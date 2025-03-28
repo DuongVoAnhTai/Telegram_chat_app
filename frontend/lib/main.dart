@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:frontend/src/ui/feature/chat/chat_screen.dart';
+import 'package:frontend/core/navigation/routers.dart';
 
 Future<void> main() async {
   // Xác định đường dẫn thư mục gốc của project
@@ -17,8 +17,13 @@ Future<void> main() async {
 class ChatApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ChatScreen(),
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: 'Telegram Lite',
+      theme: ThemeData(
+        primarySwatch: Colors.blue, // Tùy chỉnh theme nếu cần
+      ),
+      routerConfig: router,
     );
   }
 }
