@@ -13,278 +13,200 @@ class EditProfileScreen extends StatelessWidget {
     "PhoneNumber": "+84 123 456 789",
   };
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        elevation: 0,
-        leadingWidth: 90, // Điều chỉnh cho vừa với chữ "Cancel"
-        leading: TextButton(
-          onPressed: () {
-            context.pop(); // Quay lại ProfileScreen
-          },
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 16), // Căn chỉnh padding
-            alignment: Alignment.centerLeft, // Đảm bảo text căn trái
-          ),
-          child: Text(
-            "Cancel",
-            style: TextStyle(
-              fontSize: AppSizes.fontSizeBody,
-              color: AppColors.primaryColor,
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              print("Done button pressed");
-            },
-            child: Text(
-              "Done",
-              style: TextStyle(
-                fontSize: AppSizes.fontSizeBody,
-                color: AppColors.primaryColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-
+      appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ảnh đại diện
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: AppSizes.spacingMedium,
-              ),
-              child: Center(
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // Logic chọn ảnh sẽ được thêm sau
-                        print("Set new photo tapped");
-                      },
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: AppColors.primaryColor.withOpacity(
-                          0.2,
-                        ),
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 40,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      "Set New Photo",
-                      style: TextStyle(
-                        fontSize: AppSizes.fontSizeBody,
-                        color: AppColors.primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Username
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Username",
-                      filled: true,
-                      fillColor: AppColors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.borderRadius,
-                        ),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    controller: TextEditingController(text: username),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: AppSizes.paddingOnly),
-                    child: Text(
-                      "Enter your name and add an optional profile photo.",
-                      style: TextStyle(
-                        fontSize: AppSizes.fontSizeSubBody,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildProfilePhotoSection(),
+            _buildUsernameSection(),
             SizedBox(height: AppSizes.spacingMedium),
-            // Bio
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: "Bio",
-                      filled: true,
-                      fillColor: AppColors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.borderRadius,
-                        ),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    controller: TextEditingController(text: profileInfo["Bio"]),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: AppSizes.paddingOnly),
-                    child: Text(
-                      "You can add a few lines about yourself. Choose who can see your bio in Settings.",
-                      style: TextStyle(
-                        fontSize: AppSizes.fontSizeSubBody,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildBioSection(),
             SizedBox(height: AppSizes.spacingMedium),
-            // Date of Birth
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    readOnly: true, // Chỉ đọc
-                    decoration: InputDecoration(
-                      hintText: "Date of Birth",
-                      filled: true,
-                      fillColor: AppColors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.borderRadius,
-                        ),
-                        borderSide: BorderSide.none,
-                      ),
-                      suffixIcon: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: AppColors.primaryColor,
-                      ),
-                    ),
-                    controller: TextEditingController(
-                      text: profileInfo["Dob"] ?? "Add new",
-                    ),
-                    onTap: () {
-                      // Logic chỉnh sửa Dob sẽ được thêm sau
-                      print("Edit Date of Birth tapped");
-                    },
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: AppSizes.paddingOnly),
-                    child: Text(
-                      "Only your contacts can see your birthday.",
-                      style: TextStyle(
-                        fontSize: AppSizes.fontSizeSubBody,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildDateOfBirthSection(),
             SizedBox(height: AppSizes.spacingSmall),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-                ),
-                child: Column(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        print("Change Number tapped");
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.paddingOnly,
-                          vertical: 14,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              profileInfo["PhoneNumber"] ?? "Add new",
-                              style: TextStyle(fontSize: AppSizes.fontSizeBody),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: AppColors.primaryColor,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSizes.paddingOnly,
-                      ),
-                      child: Divider(
-                        color: AppColors.textSecondary,
-                        thickness: 0.5, // Độ dày của Divider
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        print("Edit Username tapped");
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.paddingOnly,
-                          vertical: 14,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              shortName.isNotEmpty ? "@$shortName" : "Add new",
-                              style: TextStyle(fontSize: AppSizes.fontSizeBody),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: AppColors.primaryColor,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            _buildAdditionalInfoSection(),
             SizedBox(height: AppSizes.spacingLarge),
           ],
         ),
       ),
     );
   }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: AppColors.backgroundColor,
+      elevation: 0,
+      leadingWidth: 90,
+      leading: _buildCancelButton(context),
+      actions: [_buildDoneButton()],
+    );
+  }
+
+  Widget _buildCancelButton(BuildContext context) {
+    return TextButton(
+      onPressed: () => context.pop(),
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        alignment: Alignment.centerLeft,
+      ),
+      child: Text(
+        "Cancel",
+        style: TextStyle(fontSize: AppSizes.fontSizeBody, color: AppColors.primaryColor),
+      ),
+    );
+  }
+
+  Widget _buildDoneButton() {
+    return TextButton(
+      onPressed: () => print("Done button pressed"),
+      child: Text(
+        "Done",
+        style: TextStyle(fontSize: AppSizes.fontSizeBody, color: AppColors.primaryColor),
+      ),
+    );
+  }
+
+  Widget _buildProfilePhotoSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingMedium),
+      child: Center(
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () => print("Set new photo tapped"),
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: AppColors.primaryColor.withOpacity(0.2),
+                child: Icon(Icons.camera_alt, size: 40, color: AppColors.primaryColor),
+              ),
+            ),
+            Text("Set New Photo", style: TextStyle(fontSize: AppSizes.fontSizeBody, color: AppColors.primaryColor)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUsernameSection() {
+    return _buildTextFieldSection("Username", username, "Enter your name and add an optional profile photo.");
+  }
+
+  Widget _buildBioSection() {
+    return _buildTextFieldSection("Bio", profileInfo["Bio"], "You can add a few lines about yourself.", maxLines: 3);
+  }
+
+  Widget _buildDateOfBirthSection() {
+    return _buildReadOnlyTextField(
+      "Date of Birth",
+      profileInfo["Dob"] ?? "Add new",
+      "Only your contacts can see your birthday.",
+      onTap: () => print("Edit Date of Birth tapped"),
+    );
+  }
+
+  Widget _buildAdditionalInfoSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+        ),
+        child: Column(
+          children: [
+            _buildInfoItem(profileInfo["PhoneNumber"] ?? "Add new", "Change Number tapped"),
+            _buildDivider(),
+            _buildInfoItem(shortName.isNotEmpty ? "@$shortName" : "Add new", "Edit Username tapped"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextFieldSection(String hint, String? value, String helperText, {int maxLines = 1}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              hintText: hint,
+              filled: true,
+              fillColor: AppColors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            controller: TextEditingController(text: value),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: AppSizes.paddingOnly),
+            child: Text(helperText, style: TextStyle(fontSize: AppSizes.fontSizeSubBody, color: AppColors.textSecondary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReadOnlyTextField(String hint, String value, String helperText, {VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            readOnly: true,
+            decoration: InputDecoration(
+              hintText: hint,
+              filled: true,
+              fillColor: AppColors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                borderSide: BorderSide.none,
+              ),
+              suffixIcon: Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.primaryColor),
+            ),
+            controller: TextEditingController(text: value),
+            onTap: onTap,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: AppSizes.paddingOnly),
+            child: Text(helperText, style: TextStyle(fontSize: AppSizes.fontSizeSubBody, color: AppColors.textSecondary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(String text, String logMessage) {
+    return InkWell(
+      onTap: () => print(logMessage),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingOnly, vertical: 14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(text, style: TextStyle(fontSize: AppSizes.fontSizeBody)),
+            Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.primaryColor),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingOnly),
+      child: Divider(color: AppColors.textSecondary, thickness: 0.5),
+    );
+  }
+
 }

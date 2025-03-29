@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:http/retry.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String username = "HarryNguyen";
@@ -21,27 +22,7 @@ class ProfileScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Top bar với nút Edit
-              Padding(
-                padding: const EdgeInsets.all(AppSizes.padding),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        context.push('/edit-profile');
-                      },
-                      child: Text(
-                        "Edit",
-                        style: TextStyle(
-                          fontSize: AppSizes.fontSizeBody,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _topBarSection(context),
               // Thông tin người dùng
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -51,132 +32,19 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // CircleAvatar
-                    Center(
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: AppColors.primaryColor,
-                        child: Text(
-                          username[0],
-                          style: TextStyle(
-                            fontSize: AppSizes.fontSizeTitle,
-                            color: AppColors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                    _avatarSection(),
                     SizedBox(height: AppSizes.spacingMedium),
                     // Tên người dùng
-                    Center(
-                      child: Text(
-                        username,
-                        style: TextStyle(
-                          fontSize: AppSizes.fontSizeTitle,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
+                    _nameUserSection(),
                     // Trạng thái hoạt động
-                    Center(
-                      child: Text(
-                        isOnline ? "Online" : "Offline",
-                        style: TextStyle(
-                          fontSize: AppSizes.fontSizeBody,
-                          color:
-                              isOnline ? Colors.green : AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
+                    _activeStatusSection(),
                     SizedBox(height: AppSizes.spacingSmall),
-                    // Thanh hr
                     Divider(color: AppColors.textSecondary),
                     SizedBox(height: AppSizes.spacingSmall),
-                    Center(
-                      child: Text(
-                        "Bio",
-                        style: TextStyle(
-                          fontSize: AppSizes.fontSizeBody,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: AppSizes.spacingSmall),
-                    Center(
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        profileInfo["Bio"]!,
-                        style: TextStyle(
-                          fontSize: AppSizes.fontSizeBody,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-
+                    _bioSection(),
                     SizedBox(height: AppSizes.spacingMedium),
+                    _informationUserSection(),
                     // Các thông tin còn lại (Phone, Email, Dob)
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Phone",
-                              style: TextStyle(
-                                fontSize: AppSizes.fontSizeBody,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              profileInfo["Phone"]!,
-                              style: TextStyle(
-                                fontSize: AppSizes.fontSizeBody,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: AppSizes.spacingMedium),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Email",
-                              style: TextStyle(
-                                fontSize: AppSizes.fontSizeBody,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              profileInfo["Email"]!,
-                              style: TextStyle(
-                                fontSize: AppSizes.fontSizeBody,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: AppSizes.spacingMedium),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Dob",
-                              style: TextStyle(
-                                fontSize: AppSizes.fontSizeBody,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              profileInfo["Dob"]!,
-                              style: TextStyle(
-                                fontSize: AppSizes.fontSizeBody,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
                     SizedBox(
                       height: AppSizes.spacingLarge,
                     ), // Khoảng trống cuối
@@ -187,6 +55,163 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Padding _topBarSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSizes.padding),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () {
+              context.push('/edit-profile');
+            },
+            child: Text(
+              "Edit",
+              style: TextStyle(
+                fontSize: AppSizes.fontSizeBody,
+                color: AppColors.primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Center _avatarSection() {
+    return Center(
+      child: CircleAvatar(
+        radius: 50,
+        backgroundColor: AppColors.primaryColor,
+        child: Text(
+          username[0],
+          style: TextStyle(
+            fontSize: AppSizes.fontSizeTitle,
+            color: AppColors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Center _nameUserSection() {
+    return Center(
+      child: Text(
+        username,
+        style: TextStyle(
+          fontSize: AppSizes.fontSizeTitle,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  Center _activeStatusSection() {
+    return Center(
+      child: Text(
+        isOnline ? "Online" : "Offline",
+        style: TextStyle(
+          fontSize: AppSizes.fontSizeBody,
+          color: isOnline ? Colors.green : AppColors.textSecondary,
+        ),
+      ),
+    );
+  }
+
+  Column _bioSection() {
+    return Column(
+      children: [
+        Center(
+          child: Text(
+            "Bio",
+            style: TextStyle(
+              fontSize: AppSizes.fontSizeBody,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        SizedBox(height: AppSizes.spacingSmall),
+        Center(
+          child: Text(
+            textAlign: TextAlign.center,
+            profileInfo["Bio"]!,
+            style: TextStyle(
+              fontSize: AppSizes.fontSizeBody,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column _informationUserSection() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Phone",
+              style: TextStyle(
+                fontSize: AppSizes.fontSizeBody,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            Text(
+              profileInfo["Phone"]!,
+              style: TextStyle(
+                fontSize: AppSizes.fontSizeBody,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: AppSizes.spacingMedium),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Email",
+              style: TextStyle(
+                fontSize: AppSizes.fontSizeBody,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            Text(
+              profileInfo["Email"]!,
+              style: TextStyle(
+                fontSize: AppSizes.fontSizeBody,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: AppSizes.spacingMedium),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Dob",
+              style: TextStyle(
+                fontSize: AppSizes.fontSizeBody,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            Text(
+              profileInfo["Dob"]!,
+              style: TextStyle(
+                fontSize: AppSizes.fontSizeBody,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
