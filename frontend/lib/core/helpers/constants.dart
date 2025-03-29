@@ -12,10 +12,12 @@ class AppColors {
 
 class AppSizes {
   static const double padding = 32.0; // Khoảng cách padding mặc định
+  static const double paddingOnly = 10.0; // Khoảng cách padding mặc định
   static const double buttonHeight = 50.0; // Chiều cao nút
   static const double iconSizeLarge = 100.0; // Kích thước logo
   static const double fontSizeTitle = 32.0; // Cỡ chữ tiêu đề
   static const double fontSizeBody = 16.0; // Cỡ chữ nội dung
+  static const double fontSizeSubBody = 12.0; // Cỡ chữ nội dung phụ
   static const double fontSizeButton = 18.0; // Cỡ chữ nút
   static const double borderRadius = 10.0; // Độ bo góc
   static const double spacingLarge = 50.0; // Khoảng cách lớn

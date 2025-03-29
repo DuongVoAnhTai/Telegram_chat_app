@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:go_router/go_router.dart';
 
 class GetCodeScreen extends StatefulWidget {
   final String email;
@@ -15,7 +15,7 @@ class GetCodeScreen extends StatefulWidget {
 }
 
 class _GetCodeScreenState extends State<GetCodeScreen> {
-  final int _otpLength = 6;
+  final int _otpLength = 4;
   late List<TextEditingController> _controllers;
   late List<FocusNode> _focusNodes;
 
@@ -60,6 +60,8 @@ class _GetCodeScreenState extends State<GetCodeScreen> {
       print("Mã OTP hợp lệ: $code, Type: ${widget.type}");
       // Ví dụ: Gửi lên backend với email và type
       // await api.verifyOtp(email: widget.email, code: code, type: widget.type);
+      context.go('/home');
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Vui lòng nhập đủ $_otpLength ký tự")),
