@@ -2,7 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
-import { setupSocket } from "./sockets/chatSocket";
+import { setupSocket } from "./config/chatSocket";
 import dotenv from "dotenv";
 import route from "./routes";
 import { connect } from "./config/database";
