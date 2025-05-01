@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Conversation from '../models/conversationModel';
 import mongoose from 'mongoose';
+import User from '../models/userModel';
 
 export const createConversation = async (req: any, res: any) => {
     try {
@@ -9,16 +10,48 @@ export const createConversation = async (req: any, res: any) => {
             userId = req.user._id;
         }
 
+        // const { participants } = req.body;
+
+        // const otherParticipants = participants.filter(
+        //     (participant: mongoose.Types.ObjectId) => participant.toString() !== userId.toString()
+        // );
+        // var newConversation = new Conversation({ name: participants.map((participant: mongoose.Types.ObjectId) => participant.toString()).join(', '), participants });
+        // if (participants.length == 2) {
+        //     newConversation = new Conversation({ name: otherParticipants.map((participant: mongoose.Types.ObjectId) => participant.toString()).join(', '), participants });
+        // }
+        // const savedConversation = await newConversation.save();
+
         const { participants } = req.body;
 
+        // Remove the current user from the list for naming
         const otherParticipants = participants.filter(
-            (participant: mongoose.Types.ObjectId) => participant.toString() !== userId.toString()
+          (participant: mongoose.Types.ObjectId) => participant.toString() !== userId.toString()
         );
-        var newConversation = new Conversation({ name: participants.map((participant: mongoose.Types.ObjectId) => participant.toString()).join(', '), participants });
-        if (participants.length == 2) {
-            newConversation = new Conversation({ name: otherParticipants.map((participant: mongoose.Types.ObjectId) => participant.toString()).join(', '), participants });
+        
+        // Fetch user names from DB
+        const users = await User.find({ _id: { $in: participants } }).select('fullName');
+        
+        const nameMap = new Map(users.map(user => [user._id.toString(), user.fullName]));
+        
+        // Default conversation name: all participants
+        let conversationName = participants
+          .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
+          .join(', ');
+        
+        // If it's a one-on-one, exclude current user
+        if (participants.length === 2) {
+          conversationName = otherParticipants
+            .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
+            .join(', ');
         }
+        
+        const newConversation = new Conversation({
+          name: conversationName,
+          participants
+        });
+        
         const savedConversation = await newConversation.save();
+
 
         res.status(201).json(savedConversation);
     } catch (error) {
@@ -30,7 +63,7 @@ export const createConversation = async (req: any, res: any) => {
 export const getUserConversations = async (req: Request, res: Response) => {
     try {
         const { id: userId } = req.params;
-        const conversations = await Conversation.find({ participants: { $in: [userId] } });
+        const conversations = await Conversation.find({ participants: { $in: [userId] } }).populate("participants", "fullName");
         res.status(200).json(conversations);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch conversations', error });
