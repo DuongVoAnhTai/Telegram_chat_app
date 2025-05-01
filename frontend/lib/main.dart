@@ -27,8 +27,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final socketService = SocketService();
   await socketService.initSocket();
-  // Xác định đường dẫn thư mục gốc của project
-  String projectRoot = Directory.current.path;
 
   // Load file .env từ thư mục gốc
   await dotenv.load(fileName: ".env");

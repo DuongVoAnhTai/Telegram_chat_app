@@ -38,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  //De lay ma OTP
   void _handleContinue() {
     String email = _emailController.text.trim();
     if (_isValidEmail(email)) {
