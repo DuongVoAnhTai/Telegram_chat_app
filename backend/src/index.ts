@@ -1,34 +1,27 @@
-import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import mongoose from "mongoose";
-import { setupSocket } from "./config/chatSocket";
 import dotenv from "dotenv";
-import route from "./routes";
 import { connect } from "./config/database";
+import { app, server } from "./config/socket";
+import { json } from "express";
+import authRoutes from "./routes/authRoutes";
+import messageRoutes from './routes/messageRoute';
+import conversationRoutes from "./routes/converstaionRoute";
+import contactRoutes from "./routes/contactRoute";
 
 // Đọc file .env
 dotenv.config();
 
-// Khởi tạo server
-const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer);
+app.use(json());
 
-// Lấy các biến môi trường từ .env
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/telegram_chat_app";
-const PORT = parseInt(process.env.PORT || "3000", 10);
+app.use('/auth', authRoutes);
+app.use('/message', messageRoutes);
+app.use('/conversation', conversationRoutes);
+app.use('/contact', contactRoutes);
 
-connect(MONGO_URI)// Kết nối MongoDB
-
-
-// Sử dụng routes
-route(app);
-
-// Thiết lập WebSocket
-setupSocket(io);
 
 // Khởi động server
-httpServer.listen(PORT, () => {
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/telegram_chat_app";
+const PORT = parseInt(process.env.PORT || "3000", 10);
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  connect(MONGO_URI);
 });

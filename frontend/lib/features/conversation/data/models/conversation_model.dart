@@ -14,11 +14,12 @@ class ConversationModel extends ConversationEntity {
        );
 
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
+    print("type of value: ${json['participants'].runtimeType}");
     return ConversationModel(
-      id: json['id'],
-      participantName: json['participantName'],
+      id: json['_id'],
+      participantName: json['participants'].toString(),
       lastMessage: json['lastMessage'],
-      lastMessageTime: json['lastMessageTime'],
+      lastMessageTime: DateTime.parse(json['updatedAt']),
     );
   }
 }

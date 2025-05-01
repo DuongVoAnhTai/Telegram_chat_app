@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/helpers/constants.dart';
-import 'package:frontend/src/ui/feature/chat/list_chat_screen.dart';
+import 'package:frontend/features/conversation/presentation/pages/list_chat_screen.dart';
 import 'package:frontend/src/ui/feature/profile/profile_screen.dart';
 import 'package:frontend/src/ui/feature/setting/setting_screen.dart';
 
@@ -28,19 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      body: SafeArea(
-        child: _screens[_selectedIndex],
-      ),
+      body: SafeArea(child: _screens[_selectedIndex]),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',

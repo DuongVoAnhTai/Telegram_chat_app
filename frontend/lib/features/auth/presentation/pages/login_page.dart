@@ -1,9 +1,9 @@
-import 'package:frontend/core/design_system/theme/theme.dart';
 import 'package:frontend/features/auth/presentation/widgets/auth_button.dart';
 import 'package:frontend/features/auth/presentation/widgets/login_prompt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/design_system/theme/theme.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -75,7 +75,11 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 listener: (context, state) {
                   if (state is AuthSuccess) {
-                    Navigator.pushNamed(context, '/chatPage');
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/home',
+                      (route) => false,
+                    );
                   } else if (state is AuthFailure) {
                     ScaffoldMessenger.of(
                       context,
@@ -86,7 +90,9 @@ class _LoginPageState extends State<LoginPage> {
               LoginPrompt(
                 title: 'Don\'t have an account?',
                 subtitle: 'Click here to register',
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/register');
+                },
               ),
             ],
           ),

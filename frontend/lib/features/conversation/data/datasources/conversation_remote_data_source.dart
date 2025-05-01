@@ -1,23 +1,21 @@
 import 'dart:convert';
 
-import 'package:frontend/features/auth/data/models/user_model.dart';
+import 'package:frontend/core/services/token.dart';
 import 'package:frontend/features/conversation/data/models/conversation_model.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ConversationRemoteDataSource {
-  final String baseUrl = 'http://192.168.1.10:6000/message';
-  final _storage = FlutterSecureStorage();
+  final String baseUrl = 'http://10.0.2.2:3000/conversation';
+  final _storage = TokenStorageService();
 
   Future<List<ConversationModel>> fetchConversations() async {
-    // String token = await _storage.read(key: 'token') ?? '';
-    String token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2YwNWJjOGU5Mjc0YTZkN2RhZGQ5ZmEiLCJpYXQiOjE3NDQxOTIxOTAsImV4cCI6MTc0NDc5Njk5MH0.krO6dLTXjMsDnLv3QkVde7kPTJQqu8VWYLNVeWF8k9Y";
+    final token = await _storage.getToken();
+    final userId = await _storage.getUserId();
     final response = await http.get(
-      Uri.parse('$baseUrl/'),
+      Uri.parse('$baseUrl/fetchConversation/$userId'),
       headers: {"Authorization": "Bearer $token"},
     );
+    print("userId: $userId");
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);

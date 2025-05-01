@@ -5,8 +5,8 @@ import 'package:frontend/features/auth/presentation/widgets/auth_input_filed.dar
 import 'package:frontend/features/auth/presentation/widgets/login_prompt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/core/design_system/theme/theme.dart';
 
+import '../../../../core/design_system/theme/theme.dart';
 import '../bloc/auth_bloc.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -96,7 +96,9 @@ class _RegisterPageState extends State<RegisterPage> {
               LoginPrompt(
                 title: 'Already have an account',
                 subtitle: 'Click here to login',
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/login');
+                },
               ),
             ],
           ),
