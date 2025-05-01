@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design_system/theme/theme.dart';
@@ -67,6 +68,7 @@ class _ListChatScreenState extends State<ListChatScreen> {
     super.initState();
     _filteredUsers = _allUsers;
     _searchController.addListener(_filterUsers);
+    BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
   }
 
   @override
