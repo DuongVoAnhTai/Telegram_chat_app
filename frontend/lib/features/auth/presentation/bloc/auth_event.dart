@@ -17,3 +17,17 @@ class LoginEvent extends AuthEvent{
 }
 
 class GetUserProfileEvent extends AuthEvent {}
+
+class UpdateProfileEvent extends AuthEvent {
+  final String? fullname;
+  final String? bio;
+  final DateTime? dob;
+  final String? profilePic;
+
+  UpdateProfileEvent({
+    this.fullname,
+    this.bio,
+    this.dob,
+    this.profilePic,
+  });
+}

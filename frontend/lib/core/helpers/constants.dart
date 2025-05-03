@@ -7,7 +7,8 @@ class AppColors {
   static const Color primaryColor = Color(0xFF0088CC); // Màu xanh chủ đạo
   static const Color white = Colors.white;
   static const Color textPrimary = Colors.black87;
-  static const Color textSecondary = Color(0xFF757575); // Màu xám cho text phụ
+  static const Color textSecondary = Color(0xFF757575);
+  static const Color borderColor = Colors.grey; // Màu xám cho text phụ
 }
 
 class AppSizes {

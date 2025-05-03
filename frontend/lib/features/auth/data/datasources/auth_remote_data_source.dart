@@ -67,4 +67,42 @@ class AuthRemoteDataSource {
       throw Exception(error['message'] ?? 'Failed to get user profile');
     }
   }
+
+  Future<UserModel> updateProfile({
+    String? fullname,
+    String? bio,
+    DateTime? dob,
+    String? profilePic,
+  }) async {
+    final token = await _storage.read(key: 'token');
+    if (token == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final Map<String, dynamic> updateData = {};
+    if (fullname != null) updateData['fullName'] = fullname;
+    if (bio != null) updateData['bio'] = bio;
+    if (dob != null) updateData['dob'] = dob.toIso8601String();
+    if (profilePic != null) updateData['profilePic'] = profilePic;
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/update'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(updateData),
+    );
+
+    if (response.statusCode == 200) {
+      final updatedUserData = jsonDecode(response.body);
+      return UserModel.fromJson({
+        ...updatedUserData,
+        'token': token,
+      });
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Failed to update profile');
+    }
+  }
 }

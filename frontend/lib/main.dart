@@ -8,6 +8,7 @@ import 'package:frontend/features/auth/data/repositories/auth_repository_impl.da
 import 'package:frontend/features/auth/domain/usecases/login_use_case.dart';
 import 'package:frontend/features/auth/domain/usecases/profile_use_case.dart';
 import 'package:frontend/features/auth/domain/usecases/register_use_case.dart';
+import 'package:frontend/features/auth/domain/usecases/update_profile_use_case.dart';
 import 'package:frontend/features/auth/presentation/bloc/auth_bloc.dart';
 // import 'package:frontend/features/auth/presentation/pages/login_page.dart';
 // import 'package:frontend/features/auth/presentation/pages/register_page.dart';
@@ -75,6 +76,7 @@ class ChatApp extends StatelessWidget {
                 registerUseCase: RegisterUseCase(repository: authRepository),
                 loginUseCase: LoginUseCase(repository: authRepository),
                 getUserProfileUseCase: GetUserProfileUseCase(repository: authRepository),
+                updateProfileUseCase: UpdateProfileUseCase(repository: authRepository),
               ),
         ),
         BlocProvider(

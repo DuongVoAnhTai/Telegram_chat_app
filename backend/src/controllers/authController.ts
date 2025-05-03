@@ -95,16 +95,39 @@ export const logout = (req: Request, res: Response) => {
 
 export const updateProfile = async (req: any, res: any) => {
     try {
-        const { profilePic } = req.body;
+        const { fullName, profilePic, bio, dob } = req.body;
         const userId = req.user._id;
 
-        if (!profilePic) {
-            res.status(400).json({ message: "Profile pic is required" });
+        let updateData: any = {};
+
+        // Nếu có profilePic, upload lên Cloudinary
+        if (profilePic && profilePic.startsWith('data:image')) {
+            const uploadResponse = await cloudinary.uploader.upload(profilePic);
+            updateData.profilePic = uploadResponse.secure_url;
+        }
+
+         // Cập nhật ten nếu có
+         if (fullName !== undefined) {
+            updateData.fullName = fullName;
+        }
+
+        // Cập nhật bio nếu có
+        if (bio !== undefined) {
+            updateData.bio = bio;
+        }
+
+         // Cập nhật dob nếu có
+         if (dob !== undefined) {
+            updateData.dob = dob;
+        }
+
+        // Nếu không có thay đổi gì, trả về thông báo
+        if (Object.keys(updateData).length === 0) {
+            res.status(400).json({ message: "No data to update" });
             return;
         }
 
-        const uploadResponse = await cloudinary.uploader.upload(profilePic)
-        const updatedUser = await User.findByIdAndUpdate(userId, { profilePic: uploadResponse.secure_url }, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-password");
 
         res.status(200).json(updatedUser);
 

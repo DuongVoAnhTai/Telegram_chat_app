@@ -31,4 +31,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity> getUserProfile() async {
     return await authRemoteDataSource.getUserProfile();
   }
+
+  @override
+  Future<UserEntity> updateProfile(String? fullname, String? bio, DateTime? dob, String? profilePic) async {
+    return await authRemoteDataSource.updateProfile(
+      fullname: fullname,
+      bio: bio,
+      dob: dob,
+      profilePic: profilePic,
+    );
+  }
 }

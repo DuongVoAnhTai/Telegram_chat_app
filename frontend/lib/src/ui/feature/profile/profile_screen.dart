@@ -177,7 +177,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         if (dob != null) ...[
           SizedBox(height: AppSizes.spacingMedium),
-          Row(
+          Row(  
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(

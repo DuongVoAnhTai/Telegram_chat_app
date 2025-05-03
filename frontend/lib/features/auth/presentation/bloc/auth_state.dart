@@ -23,3 +23,10 @@ class ProfileLoaded extends AuthState {
 
   ProfileLoaded({required this.user});
 }
+
+class ProfileUpdated extends AuthState {
+  final UserEntity user;
+  final String message;
+
+  ProfileUpdated({required this.user, required this.message});
+}
