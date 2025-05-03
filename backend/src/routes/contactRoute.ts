@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.get('/fetchContact', authenticateToken, fetchContacts);
 
-router.post('/create', authenticateToken, createContact);
+router.post('/addContact', authenticateToken, createContact);
 
 export default router;

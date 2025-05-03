@@ -10,7 +10,7 @@ const ConversationSchema: Schema = new Schema(
     {
         name: {
             type: String,
-            required: true,
+            default: '',
         },
         participants: [
             {

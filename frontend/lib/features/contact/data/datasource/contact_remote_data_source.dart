@@ -22,15 +22,18 @@ class ContactRemoteDataSource {
     }
   }
 
-  Future<void> addContact(String contactId) async {
+  Future<void> addContact(String email) async {
     final token = await _storage.getToken();
     final response = await http.post(
       Uri.parse('$baseUrl/addContact'),
-      body: jsonEncode({"contactId": contactId}),
-      headers: {"Authorization": "Bearer $token"},
+      body: jsonEncode({"contactEmail": email}),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
       throw Exception('Failed to add contact');
     }
   }
