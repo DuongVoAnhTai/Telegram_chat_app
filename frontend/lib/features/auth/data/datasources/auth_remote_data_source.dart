@@ -1,10 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import '../models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRemoteDataSource {
   final String baseUrl = "http://10.0.2.2:3000/auth";
+  final _storage = FlutterSecureStorage();
 
   Future<UserModel> login({
     required String email,
@@ -35,5 +39,32 @@ class AuthRemoteDataSource {
     );
 
     return UserModel.fromJson(jsonDecode(response.body));
+  }
+
+  Future<UserModel> getUserProfile() async {
+    final token = await _storage.read(key: 'token');
+    if (token == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/get'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final userData = jsonDecode(response.body);
+      debugPrint('User profile response: $userData'); 
+      return UserModel.fromJson({
+        ...userData,
+        'token': token,
+      });
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Failed to get user profile');
+    }
   }
 }

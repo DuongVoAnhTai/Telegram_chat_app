@@ -26,4 +26,9 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
   }
+
+  @override
+  Future<UserEntity> getUserProfile() async {
+    return await authRemoteDataSource.getUserProfile();
+  }
 }

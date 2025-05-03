@@ -40,3 +40,11 @@ TELEGRAM_CHAT_APP
     => The next time, you only open docker desktop, open container tab and run container that you build from image without run "npm start" in terminal backend
 
    
+    *** ENV FILE
+        BACKEND:
+            B1: Open terminal and cd .\backend
+            B2: Conduct copy file .env.example with command "cp .env.example .env" or "copy .env.example .env"
+            B3: Fill the key into file .env
+        FRONTEND:
+            B1: Open terminal and cd .\frontend
+            B2: SAME AS ABOVE
