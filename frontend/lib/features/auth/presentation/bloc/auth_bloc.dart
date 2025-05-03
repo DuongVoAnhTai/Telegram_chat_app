@@ -1,4 +1,5 @@
 import 'package:frontend/features/auth/domain/usecases/login_use_case.dart';
+import 'package:frontend/features/auth/domain/usecases/profile_use_case.dart';
 import 'package:frontend/features/auth/presentation/bloc/auth_event.dart';
 import 'package:frontend/features/auth/presentation/bloc/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,11 +9,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterUseCase registerUseCase;
   final LoginUseCase loginUseCase;
+  final GetUserProfileUseCase getUserProfileUseCase;
   final _storage = FlutterSecureStorage();
-  AuthBloc({required this.registerUseCase, required this.loginUseCase})
+  AuthBloc({required this.registerUseCase, required this.loginUseCase, required this.getUserProfileUseCase,})
     : super(AuthInitial()) {
     on<RegisterEvent>(_onRegister);
     on<LoginEvent>(_onLogin);
+    on<GetUserProfileEvent>(_onGetUserProfile);
   }
 
   Future<void> _onRegister(RegisterEvent event, Emitter<AuthState> emit) async {
@@ -38,6 +41,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthSuccess(message: "Login successful"));
     } catch (error) {
       emit(AuthFailure(error: 'Login failed'));
+    }
+  }
+
+  Future<void> _onGetUserProfile(GetUserProfileEvent event, Emitter<AuthState> emit,) async {
+    emit(AuthLoading());
+    try {
+      final user = await getUserProfileUseCase();
+      emit(ProfileLoaded(user: user));
+    } catch (error) {
+      emit(AuthFailure(error: error.toString()));
     }
   }
 }

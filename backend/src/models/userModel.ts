@@ -7,7 +7,10 @@ const userSchema = new Schema(
             required: true,
             unique: true,
         },
-        fullName: String,
+        fullName: {
+            type: String,
+            required: true,
+        },
         password: {
             type: String,
             required: true,
@@ -16,6 +19,14 @@ const userSchema = new Schema(
         profilePic: {
             type: String,
             default: "",
+        },
+        bio: {
+            type: String,
+            default: "",
+        },
+        dob: {
+            type: Date,
+            default: null,
         }
     },
     { timestamps: true }

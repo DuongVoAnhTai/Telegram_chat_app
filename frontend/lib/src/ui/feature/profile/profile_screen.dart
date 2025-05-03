@@ -1,58 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/helpers/constants.dart';
-import 'package:http/retry.dart';
+import 'package:frontend/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:frontend/features/auth/presentation/bloc/auth_event.dart';
+import 'package:frontend/features/auth/presentation/bloc/auth_state.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatelessWidget {
-  final String username = "HarryNguyen";
-  final bool isOnline = true;
-  final Map<String, String> profileInfo = {
-    "Bio":
-        "Game developer with a passion for creating immersive experiences in Unity.",
-    "Phone": "+84 123 456 789",
-    "Email": "harrynguyen@example.com",
-    "Dob": "17/11/2004",
-  };
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _topBarSection(context),
-              // Thông tin người dùng
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.padding,
-                ),
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            if (state is AuthLoading) {
+              return Center(child: CircularProgressIndicator());
+            } else if (state is ProfileLoaded) {
+              final user = state.user;
+              return SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // CircleAvatar
-                    _avatarSection(),
-                    SizedBox(height: AppSizes.spacingMedium),
-                    // Tên người dùng
-                    _nameUserSection(),
-                    // Trạng thái hoạt động
-                    _activeStatusSection(),
-                    SizedBox(height: AppSizes.spacingSmall),
-                    Divider(color: AppColors.textSecondary),
-                    SizedBox(height: AppSizes.spacingSmall),
-                    _bioSection(),
-                    SizedBox(height: AppSizes.spacingMedium),
-                    _informationUserSection(),
-                    // Các thông tin còn lại (Phone, Email, Dob)
-                    SizedBox(
-                      height: AppSizes.spacingLarge,
-                    ), // Khoảng trống cuối
+                    _topBarSection(context),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.padding,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _avatarSection(user.fullname),
+                          SizedBox(height: AppSizes.spacingMedium),
+                          _nameUserSection(user.fullname),
+                          _activeStatusSection(),
+                          SizedBox(height: AppSizes.spacingSmall),
+                          Divider(color: AppColors.textSecondary),
+                          SizedBox(height: AppSizes.spacingSmall),
+                          if (user.bio.isNotEmpty) ...[
+                            _bioSection(user.bio),
+                            SizedBox(height: AppSizes.spacingMedium),
+                          ],
+                          _informationUserSection(user.email, user.dob),
+                          SizedBox(height: AppSizes.spacingLarge),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
+              );
+            } else if (state is AuthFailure) {
+              return Center(child: Text('Error: ${state.error}'));
+            }
+            context.read<AuthBloc>().add(GetUserProfileEvent());
+            return Center(child: CircularProgressIndicator());
+          },
         ),
       ),
     );
@@ -81,13 +83,13 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Center _avatarSection() {
+  Center _avatarSection(String fullname) {
     return Center(
       child: CircleAvatar(
         radius: 50,
         backgroundColor: AppColors.primaryColor,
         child: Text(
-          username[0],
+          fullname.isNotEmpty ? fullname[0].toUpperCase() : 'U',
           style: TextStyle(
             fontSize: AppSizes.fontSizeTitle,
             color: AppColors.white,
@@ -97,10 +99,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Center _nameUserSection() {
+  Center _nameUserSection(String fullname) {
     return Center(
       child: Text(
-        username,
+        fullname.isEmpty ? 'Unknown User' : fullname, // Xử lý fullname rỗng
         style: TextStyle(
           fontSize: AppSizes.fontSizeTitle,
           fontWeight: FontWeight.bold,
@@ -111,6 +113,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Center _activeStatusSection() {
+    const isOnline = true;
     return Center(
       child: Text(
         isOnline ? "Online" : "Offline",
@@ -122,7 +125,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Column _bioSection() {
+  Column _bioSection(String bio) {
     return Column(
       children: [
         Center(
@@ -138,7 +141,7 @@ class ProfileScreen extends StatelessWidget {
         Center(
           child: Text(
             textAlign: TextAlign.center,
-            profileInfo["Bio"]!,
+            bio,
             style: TextStyle(
               fontSize: AppSizes.fontSizeBody,
               color: AppColors.textPrimary,
@@ -149,29 +152,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Column _informationUserSection() {
+  Column _informationUserSection(String email, DateTime? dob) {
+    final dateFormatter = DateFormat('dd/MM/yyyy');
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Phone",
-              style: TextStyle(
-                fontSize: AppSizes.fontSizeBody,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            Text(
-              profileInfo["Phone"]!,
-              style: TextStyle(
-                fontSize: AppSizes.fontSizeBody,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: AppSizes.spacingMedium),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -183,7 +167,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             Text(
-              profileInfo["Email"]!,
+              email.isEmpty ? 'No email' : email, // Xử lý email rỗng
               style: TextStyle(
                 fontSize: AppSizes.fontSizeBody,
                 color: AppColors.textPrimary,
@@ -191,26 +175,28 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: AppSizes.spacingMedium),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Dob",
-              style: TextStyle(
-                fontSize: AppSizes.fontSizeBody,
-                color: AppColors.textSecondary,
+        if (dob != null) ...[
+          SizedBox(height: AppSizes.spacingMedium),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Dob",
+                style: TextStyle(
+                  fontSize: AppSizes.fontSizeBody,
+                  color: AppColors.textSecondary,
+                ),
               ),
-            ),
-            Text(
-              profileInfo["Dob"]!,
-              style: TextStyle(
-                fontSize: AppSizes.fontSizeBody,
-                color: AppColors.textPrimary,
+              Text(
+                dateFormatter.format(dob),
+                style: TextStyle(
+                  fontSize: AppSizes.fontSizeBody,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ],
     );
   }

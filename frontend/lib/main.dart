@@ -6,6 +6,7 @@ import 'package:frontend/core/design_system/theme/theme.dart';
 import 'package:frontend/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:frontend/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:frontend/features/auth/domain/usecases/login_use_case.dart';
+import 'package:frontend/features/auth/domain/usecases/profile_use_case.dart';
 import 'package:frontend/features/auth/domain/usecases/register_use_case.dart';
 import 'package:frontend/features/auth/presentation/bloc/auth_bloc.dart';
 // import 'package:frontend/features/auth/presentation/pages/login_page.dart';
@@ -73,6 +74,7 @@ class ChatApp extends StatelessWidget {
               (_) => AuthBloc(
                 registerUseCase: RegisterUseCase(repository: authRepository),
                 loginUseCase: LoginUseCase(repository: authRepository),
+                getUserProfileUseCase: GetUserProfileUseCase(repository: authRepository),
               ),
         ),
         BlocProvider(
