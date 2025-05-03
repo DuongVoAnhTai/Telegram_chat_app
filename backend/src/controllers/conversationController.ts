@@ -25,31 +25,31 @@ export const createConversation = async (req: any, res: any) => {
 
         // Remove the current user from the list for naming
         const otherParticipants = participants.filter(
-          (participant: mongoose.Types.ObjectId) => participant.toString() !== userId.toString()
+            (participant: mongoose.Types.ObjectId) => participant.toString() !== userId.toString()
         );
-        
+
         // Fetch user names from DB
         const users = await User.find({ _id: { $in: participants } }).select('fullName');
-        
+
         const nameMap = new Map(users.map(user => [user._id.toString(), user.fullName]));
-        
+
         // Default conversation name: all participants
         let conversationName = participants
-          .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
-          .join(', ');
-        
-        // If it's a one-on-one, exclude current user
-        if (participants.length === 2) {
-          conversationName = otherParticipants
             .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
             .join(', ');
+
+        // If it's a one-on-one, exclude current user
+        if (participants.length === 2) {
+            conversationName = otherParticipants
+                .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
+                .join(', ');
         }
-        
+
         const newConversation = new Conversation({
-          name: conversationName,
-          participants
+            name: conversationName,
+            participants
         });
-        
+
         const savedConversation = await newConversation.save();
 
 
@@ -90,7 +90,7 @@ export const getConversationBetweenUsers = async (req: Request, res: Response) =
     }
 }
 
-export const checkOrCreateConversation = async (req: any, res: Response) => {
+export const checkOrCreateConversation = async (req: any, res: any) => {
     try {
         let userId = null;
         if (req.user) {

@@ -2,4 +2,6 @@ import 'package:frontend/features/conversation/domain/entities/conversation_enti
 
 abstract class ConversationRepository {
   Future<List<ConversationEntity>> fetchConversations();
+  Future<void> createConversations(String participantId);
+  Future<String> checkCreateConversation(String contactId);
 }

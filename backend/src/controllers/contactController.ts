@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Contact from '../models/contactModel';
+import User from '../models/userModel';
 // Get all contacts
 export const fetchContacts = async (req: any, res: any) => {
     let userId = null;
@@ -35,7 +36,9 @@ export const createContact = async (req: any, res: Response) => {
         if (req.user) {
             userId = req.user._id;
         }
-        const { contactId } = req.body;
+        const { contactEmail } = req.body;
+
+        const contactId = await User.findOne({ email: contactEmail });
 
         const newContact = new Contact({
             userId: req.user._id,

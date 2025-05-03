@@ -12,6 +12,8 @@ class ConversationLoaded extends ConversationState {
   ConversationLoaded(this.conversations);
 }
 
+class ConversationCreating extends ConversationState {}
+
 class ConversationError extends ConversationState {
   final String message;
 

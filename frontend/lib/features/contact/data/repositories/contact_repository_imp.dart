@@ -1,10 +1,11 @@
 import 'package:frontend/features/contact/domain/entities/contact_entity.dart';
+import '../../domain/repositories/contact_repository.dart';
 import '../datasource/contact_remote_data_source.dart';
 
-class ContactRepositoryImp {
+class ContactRepositoryImpl implements ContactRepository {
   final ContactRemoteDataSource datasource;
 
-  ContactRepositoryImp(this.datasource);
+  ContactRepositoryImpl({required this.datasource});
 
   @override
   Future<List<ContactEntity>> fetchContacts() async {
@@ -17,9 +18,9 @@ class ContactRepositoryImp {
   }
 
   @override
-  Future<void> addContact(String contactId) async {
+  Future<void> addContact(String email) async {
     try {
-      await datasource.addContact(contactId);
+      await datasource.addContact(email);
     } catch (e) {
       throw Exception('Error adding contact: $e');
     }

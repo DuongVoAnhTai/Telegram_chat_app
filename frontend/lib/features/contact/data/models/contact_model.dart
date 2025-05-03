@@ -9,8 +9,8 @@ class ContactModel extends ContactEntity {
 
   factory ContactModel.fromJson(Map<String, dynamic> json) {
     return ContactModel(
-      id: json['id'] as String,
-      name: json['contactId']['name'] as String,
+      id: json['_id'] as String,
+      name: json['contactId']['fullName'] as String,
       email: json['contactId']['email'] as String,
     );
   }

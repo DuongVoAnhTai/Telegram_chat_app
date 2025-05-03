@@ -239,7 +239,7 @@ class _ListChatScreenState extends State<ListChatScreen> {
                             //         ),
                             //   ),
                             // );
-                            context.go(
+                            context.push(
                               "/chat-page?id=${conversation.id}&mate=${conversation.participantName}",
                             );
                           },
@@ -272,10 +272,10 @@ class _ListChatScreenState extends State<ListChatScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor,
-        child: const Icon(FontAwesomeIcons.plus),
+        child: const Icon(Icons.contacts_outlined),
         onPressed: () {
           // Navigate to new chat screen
-          print("Create new chat");
+          context.push("/contact-page");
         },
       ),
     );
@@ -293,7 +293,7 @@ class _ListChatScreenState extends State<ListChatScreen> {
       ),
       title: Text(
         name,
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
       ),
       subtitle: Text(
         message,

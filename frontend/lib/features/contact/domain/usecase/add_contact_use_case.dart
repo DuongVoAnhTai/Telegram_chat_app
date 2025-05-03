@@ -6,6 +6,6 @@ class AddContactUseCase {
   AddContactUseCase(this._contactRepository);
 
   Future<void> call({required String email}) async {
-    await _contactRepository.addContact(email: email);
+    await _contactRepository.addContact(email);
   }
 }
