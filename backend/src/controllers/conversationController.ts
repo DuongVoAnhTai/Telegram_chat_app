@@ -119,3 +119,27 @@ export const checkOrCreateConversation = async (req: any, res: any) => {
         res.status(500).json({ message: 'Failed to check or create conversation', error });
     }
 }
+
+export const createNewConversationSavedMessageForNewUser = async (userId: string) => {
+    try {
+        const existing = await Conversation.findOne({
+             participants: [userId],
+             name: "Saved Messages", 
+        });
+        if (existing) {
+            return existing;
+        }
+        const newConversation = await Conversation.create({
+            name: "Saved Messages",
+            participants: [userId],
+            lastMessage: "",
+        });
+        newConversation.saveMessageId = newConversation._id as mongoose.Types.ObjectId;
+        await newConversation.save();
+
+        return newConversation;
+    } catch (error) {
+        console.error("Error creating saved message conversation:", error);
+        throw error;
+    }
+} 

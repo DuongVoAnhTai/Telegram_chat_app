@@ -4,6 +4,7 @@ export interface IConversation extends Document {
     participants: mongoose.Types.ObjectId[];
     lastMessage: string;
     updatedAt: Date;
+    saveMessageId: mongoose.Types.ObjectId;
 }
 
 const ConversationSchema: Schema = new Schema(
@@ -22,6 +23,9 @@ const ConversationSchema: Schema = new Schema(
         lastMessage: {
             type: String,
             default: '',
+        },
+        saveMessageId: {
+            type: mongoose.Types.ObjectId,
         },
     },
     {

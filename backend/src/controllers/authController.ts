@@ -5,6 +5,7 @@ import { read } from "fs";
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv'
 import cloudinary from "../config/cloudinary";
+import { createNewConversationSavedMessageForNewUser } from "./conversationController";
 
 config();
 
@@ -70,7 +71,7 @@ export const login = async (req: Request, res: Response) => {
             res.status(400).json({ message: "Invalid credential" });
             return;
         }
-
+        await createNewConversationSavedMessageForNewUser(user._id.toString());
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
         res.status(200).json({
