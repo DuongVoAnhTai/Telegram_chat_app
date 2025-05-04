@@ -74,10 +74,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDob) {
-      final localDate = DateTime(picked.year, picked.month, picked.day);
+      final localDate = DateTime(picked.year, picked.month, picked.day + 1);
       setState(() {
         _selectedDob = localDate;
-        _dobController.text = "${localDate.day}/${localDate.month}/${localDate.year}";
+        _dobController.text = "${localDate.day - 1}/${localDate.month}/${localDate.year}";
       });
     }
   }
