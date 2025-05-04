@@ -101,9 +101,13 @@ export const updateProfile = async (req: any, res: any) => {
         let updateData: any = {};
 
         // Nếu có profilePic, upload lên Cloudinary
-        if (profilePic && profilePic.startsWith('data:image')) {
-            const uploadResponse = await cloudinary.uploader.upload(profilePic);
-            updateData.profilePic = uploadResponse.secure_url;
+        /**
+         * Flutter upload ảnh lên Cloudinary
+         * Sau Cloudinary trả về url ảnh
+         * Ta lấy link ảnh đó và lưu vào profilePic
+         */
+        if (profilePic && profilePic.startsWith('https://res.cloudinary.com')) {
+            updateData.profilePic = profilePic;
         }
 
          // Cập nhật ten nếu có
@@ -141,5 +145,27 @@ export const checkAuth = async (req: any, res: any) => {
         res.status(200).json(req.user);
     } catch (error) {
         res.status(500).json({ message: "Failed" + error });
+    }
+};
+
+//Tạo signature cho Cloudinary để upload ảnh
+export const generateCloudinarySignature = async (req: any, res: any) => {
+    try {
+        const timestamp = Math.round(new Date().getTime() / 1000);
+        const publicId = `user_profile_${timestamp}`;
+        const signature = cloudinary.utils.api_sign_request(
+            { timestamp, folder: 'profile_pics', public_id: publicId },
+            process.env.CLOUDINARY_API_SECRET!
+        );
+        res.status(200).json({
+            signature,
+            timestamp,
+            publicId,
+            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+            apiKey: process.env.CLOUDINARY_API_KEY,
+        });
+    } catch (error) {
+        console.error('Signature generation error:', error);
+        res.status(500).json({ message: 'Failed to generate signature' });
     }
 };

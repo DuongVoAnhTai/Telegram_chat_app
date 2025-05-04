@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/core/services/cloudinary.dart';
 import 'package:frontend/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:frontend/features/auth/presentation/bloc/auth_event.dart';
 import 'package:frontend/features/auth/presentation/bloc/auth_state.dart';
@@ -22,8 +23,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
-  String? _profilePicBase64;
+  String? _profilePicUrl;
   DateTime? _selectedDob;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -39,14 +41,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickAndUploadImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      final bytes = await File(pickedFile.path).readAsBytes();
       setState(() {
-        _profilePicBase64 = base64Encode(bytes);
+        _isUploading = true;
       });
+      try {
+        final imageFile = File(pickedFile.path);
+        final uploadedUrl = await CloudinaryHelper.uploadImage(imageFile);
+        setState(() {
+          _profilePicUrl = uploadedUrl;
+          _isUploading = false;
+        });
+      } catch (e) {
+        setState(() {
+          _isUploading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload image: $e')),
+        );
+      }
     }
   }
 
@@ -58,20 +74,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDob) {
-      final localDate = DateTime(picked.year, picked.month, picked.day + 1);
+      final localDate = DateTime(picked.year, picked.month, picked.day);
       setState(() {
         _selectedDob = localDate;
-        _dobController.text = "${localDate.day - 1}/${localDate.month}/${localDate.year}";
+        _dobController.text = "${localDate.day}/${localDate.month}/${localDate.year}";
       });
     }
   }
 
   void _saveProfile() {
     context.read<AuthBloc>().add(UpdateProfileEvent(
-      fullname: _usernameController.text,
-      bio: _bioController.text,
+      fullname: _usernameController.text.isNotEmpty ? _usernameController.text : null,
+      bio: _bioController.text.isNotEmpty ? _bioController.text : null,
       dob: _selectedDob,
-      profilePic: _profilePicBase64,
+      profilePic: _profilePicUrl,
     ));
   }
 
@@ -82,11 +98,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         if (state is ProfileLoaded) {
           _usernameController.text = state.user.fullname ?? '';
           _bioController.text = state.user.bio ?? '';
+          _profilePicUrl = state.user.profilePic.isNotEmpty ? state.user.profilePic : null;
           if (state.user.dob != null) {
-            _selectedDob = DateTime.parse(state.user.dob.toString().split('T')[0]);
+            _selectedDob = state.user.dob;
             _dobController.text =
                 "${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}";
-          }else {
+          } else {
             _selectedDob = null;
             _dobController.clear();
           }
@@ -118,8 +135,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       SizedBox(height: AppSizes.spacingMedium),
                       _buildDateOfBirthSection(context),
                       SizedBox(height: AppSizes.spacingSmall),
-                      // _buildAdditionalInfoSection(),
-                      // SizedBox(height: AppSizes.spacingLarge),
                     ],
                   ),
                 ),
@@ -171,17 +186,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Column(
           children: [
             GestureDetector(
-              onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: AppColors.primaryColor.withOpacity(0.2),
-                backgroundImage: _profilePicBase64 != null
-                    ? MemoryImage(base64Decode(_profilePicBase64!))
-                    : null,
-                child: _profilePicBase64 == null
-                    ? Icon(Icons.camera_alt,
-                        size: 40, color: AppColors.primaryColor)
-                    : null,
+              onTap: _isUploading ? null : _pickAndUploadImage,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.primaryColor.withOpacity(0.2),
+                    backgroundImage: _profilePicUrl != null
+                        ? NetworkImage(_profilePicUrl!)
+                        : null,
+                    child: _profilePicUrl == null && !_isUploading
+                        ? Icon(Icons.camera_alt,
+                            size: 40, color: AppColors.primaryColor)
+                        : null,
+                  ),
+                  if (_isUploading)
+                    CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+                    ),
+                ],
               ),
             ),
             Text(
@@ -221,25 +246,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onTap: () => _selectDate(context),
     );
   }
-
-  // Widget _buildAdditionalInfoSection() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
-  //     child: Container(
-  //       decoration: BoxDecoration(
-  //         color: AppColors.white,
-  //         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-  //       ),
-  //       child: Column(
-  //         children: [
-  //           _buildInfoItem("+84 123 456 789", "Change Number tapped"),
-  //           _buildDivider(),
-  //           _buildInfoItem("@harry_n", "Edit Username tapped"),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildTextFieldSection(
       String hint, TextEditingController controller, String helperText,
@@ -335,31 +341,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildInfoItem(String text, String logMessage) {
-    return InkWell(
-      onTap: () => print(logMessage),
-      child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSizes.paddingOnly, vertical: 14),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(text, style: TextStyle(fontSize: AppSizes.fontSizeBody)),
-            Icon(Icons.arrow_forward_ios,
-                size: 16, color: AppColors.primaryColor),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingOnly),
-      child: Divider(color: AppColors.textSecondary, thickness: 0.5),
     );
   }
 }

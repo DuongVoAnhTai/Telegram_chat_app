@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, logout, updateProfile, checkAuth } from '../controllers/authController';
+import { register, login, logout, updateProfile, checkAuth, generateCloudinarySignature } from '../controllers/authController';
 import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -11,5 +11,7 @@ router.post('/logout', logout);
 router.put('/update', authenticateToken, updateProfile);
 
 router.get('/get', authenticateToken, checkAuth)
+
+router.get('/cloudinary-signature', authenticateToken, generateCloudinarySignature)
 
 export default router;

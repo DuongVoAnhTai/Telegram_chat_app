@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import '../models/user_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -84,6 +82,7 @@ class AuthRemoteDataSource {
     if (bio != null) updateData['bio'] = bio;
     if (dob != null) updateData['dob'] = dob.toIso8601String();
     if (profilePic != null) updateData['profilePic'] = profilePic;
+      print('UPDATEDATA: ${updateData}');
 
     final response = await http.put(
       Uri.parse('$baseUrl/update'),

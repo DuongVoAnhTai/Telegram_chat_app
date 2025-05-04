@@ -30,7 +30,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _avatarSection(user.fullname),
+                          _avatarSection(user.fullname, user.profilePic),
                           SizedBox(height: AppSizes.spacingMedium),
                           _nameUserSection(user.fullname),
                           _activeStatusSection(),
@@ -83,18 +83,23 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Center _avatarSection(String fullname) {
+  Center _avatarSection(String fullname, String? profilePic) {
     return Center(
       child: CircleAvatar(
         radius: 50,
         backgroundColor: AppColors.primaryColor,
-        child: Text(
-          fullname.isNotEmpty ? fullname[0].toUpperCase() : 'U',
-          style: TextStyle(
-            fontSize: AppSizes.fontSizeTitle,
-            color: AppColors.white,
-          ),
-        ),
+        backgroundImage: profilePic != null && profilePic.isNotEmpty
+            ? NetworkImage(profilePic)
+            : null,
+        child: profilePic == null || profilePic.isEmpty
+            ? Text(
+                fullname.isNotEmpty ? fullname[0].toUpperCase() : 'U',
+                style: TextStyle(
+                  fontSize: AppSizes.fontSizeTitle,
+                  color: AppColors.white,
+                ),
+              )
+            : null,
       ),
     );
   }
@@ -177,7 +182,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         if (dob != null) ...[
           SizedBox(height: AppSizes.spacingMedium),
-          Row(  
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
