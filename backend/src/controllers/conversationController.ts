@@ -134,7 +134,7 @@ export const createNewConversationSavedMessageForNewUser = async (userId: string
             participants: [userId],
             lastMessage: "",
         });
-        newConversation.saveMessageId = newConversation._id as mongoose.Types.ObjectId;
+        newConversation.savedMessagesId = newConversation._id as mongoose.Types.ObjectId;
         await newConversation.save();
 
         return newConversation;

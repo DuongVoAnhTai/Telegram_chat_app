@@ -4,5 +4,6 @@ class ConversationEntity{
   final String lastMessage;
   final DateTime lastMessageTime;
   final String conversationName;
-  ConversationEntity({required this.id,required this.participantName, required this.lastMessage,required this.lastMessageTime, required this.conversationName});
+  final String savedMessagesId;
+  ConversationEntity({required this.id,required this.participantName, required this.lastMessage,required this.lastMessageTime, required this.conversationName, required this.savedMessagesId});
 }

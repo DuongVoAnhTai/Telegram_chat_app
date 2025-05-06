@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/core/services/token.dart';
 import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -21,8 +22,18 @@ class SettingsScreen extends StatelessWidget {
           _SettingsTile(
             icon: Icons.bookmark,
             title: 'Saved messages',
-            onTap: () {
-              // Navigate to saved messages
+            onTap: () async {
+              final _storage = TokenStorageService();
+              final savedMessagesId = await _storage.getSavedMessages();
+              if (savedMessagesId != null && savedMessagesId.isNotEmpty) {
+                context.push(
+                  "/chat-page?id=$savedMessagesId&mate=Saved%20Messages"
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('No saved messages found')),
+                );
+              }
             },
           ),
           _SettingsTile(

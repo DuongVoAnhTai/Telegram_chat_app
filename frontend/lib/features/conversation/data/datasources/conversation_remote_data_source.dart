@@ -18,7 +18,20 @@ class ConversationRemoteDataSource {
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
-      return data.map((json) => ConversationModel.fromJson(json)).toList();
+      print(jsonEncode(data));
+
+      List<ConversationModel> conversations = data.map((json) => ConversationModel.fromJson(json)).toList();
+
+      // Tìm conversation có savedMessagesId và lưu xuống store
+      for (var convo in conversations) {
+        print(convo.savedMessagesId?? "DEO CO CAI CON ME GI HETTTTTTT");
+        if (convo.savedMessagesId.isNotEmpty) {
+          await _storage.saveSavedMessages(convo.savedMessagesId);
+          break; // Nếu chỉ cần lưu một cái đầu tiên
+        }
+      }
+
+      return conversations; 
     } else {
       throw Exception('Failed to fetch conversations');
     }
