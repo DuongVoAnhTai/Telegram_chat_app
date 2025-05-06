@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IConversation extends Document {
+    name: string;
     participants: mongoose.Types.ObjectId[];
     lastMessage: string;
     updatedAt: Date;

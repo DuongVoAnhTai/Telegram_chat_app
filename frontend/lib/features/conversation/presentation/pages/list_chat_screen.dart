@@ -240,11 +240,11 @@ class _ListChatScreenState extends State<ListChatScreen> {
                             //   ),
                             // );
                             context.push(
-                              "/chat-page?id=${conversation.id}&mate=${conversation.participantName}",
+                              "/chat-page?id=${conversation.id}&mate=${conversation.conversationName}",
                             );
                           },
                           child: _buildMessageTile(
-                            conversation.participantName,
+                            conversation.conversationName,
                             conversation.lastMessage,
                             conversation.lastMessageTime.toString(),
                           ),
