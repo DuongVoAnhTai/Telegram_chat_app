@@ -15,6 +15,8 @@ class ConversationRemoteDataSource {
       Uri.parse('$baseUrl/fetchConversation/$userId'),
       headers: {"Authorization": "Bearer $token"},
     );
+    print("userId: ");
+    print(userId);
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
@@ -22,10 +24,10 @@ class ConversationRemoteDataSource {
 
       List<ConversationModel> conversations = data.map((json) => ConversationModel.fromJson(json)).toList();
 
-      // Tìm conversation có savedMessagesId và lưu xuống store
-      for (var convo in conversations) {
-        print(convo.savedMessagesId?? "DEO CO CAI CON ME GI HETTTTTTT");
-        if (convo.savedMessagesId.isNotEmpty) {
+          // Tìm conversation có savedMessagesId và lưu xuống store
+          for (var convo in conversations) {
+            print(convo.savedMessagesId?? "DEO CO CAI CON ME GI HETTTTTTT");
+            if (convo.savedMessagesId.isNotEmpty) {
           await _storage.saveSavedMessages(convo.savedMessagesId);
           break; // Nếu chỉ cần lưu một cái đầu tiên
         }
