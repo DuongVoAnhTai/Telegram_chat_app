@@ -8,7 +8,8 @@ class LoadMessageEvent extends ChatEvent {
 class SendMessagesEvent extends ChatEvent {
   final String conversationId;
   final String text;
-  SendMessagesEvent(this.conversationId, this.text);
+  final List<String>? imageUrls;
+  SendMessagesEvent(this.conversationId, this.text, {this.imageUrls});
 }
 
 class ReceiveMessagesEvent extends ChatEvent {

@@ -3,7 +3,7 @@ class MessageEntity{
   final String conversationId;
   final String senderId;
   final String text;
-  final String image;
+  final List<String> image;
   final DateTime createAt;
 
   MessageEntity({

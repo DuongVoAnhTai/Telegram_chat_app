@@ -31,6 +31,14 @@ class SocketService {
     _socket.onDisconnect((_) {
       print('Socket disconnected');
     });
+
+    _socket.onConnectError((data) {
+      print('Connection error: $data');
+    });
+
+    _socket.on('messageError', (data) {
+      print('Message error: $data');
+    });
   }
 
   IO.Socket get socket => _socket;

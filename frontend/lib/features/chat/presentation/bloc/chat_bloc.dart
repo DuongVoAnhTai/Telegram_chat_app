@@ -44,10 +44,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     final newMessage = {
       'text': event.text,
-      'image': "",
+      'image': event.imageUrls ?? [],
       'senderId': userId,
       'conversationId': event.conversationId,
     };
+
+    print("MESSAGE: $newMessage");
 
     _socketService.socket.emit('sendMessage', newMessage);
   }

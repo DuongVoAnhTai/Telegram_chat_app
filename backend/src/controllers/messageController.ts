@@ -29,11 +29,11 @@ export const getMessages = async (req: any, res: any) => {
 
 export const sendMessage = async (req: any, res: any) => {
     try {
-        const { text, image } = req.body;
+        const { text, images } = req.body;
         const { id: conversationId } = req.params;
         const senderId = req.user._id;
 
-        const newMessage = await sendMessageLogic(text, image, senderId, conversationId);
+        const newMessage = await sendMessageLogic(text, images, senderId, conversationId);
         //TODO: realtime functionality gose here => socket.io
 
         res.status(201).json(newMessage);

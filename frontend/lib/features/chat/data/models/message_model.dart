@@ -6,7 +6,7 @@ class MessageModel extends MessageEntity {
     required String conversationId,
     required String senderId,
     required String text,
-    required String image,
+    required List<String> image,
     required DateTime createAt,
   }) : super(
          id: id,
@@ -23,7 +23,7 @@ class MessageModel extends MessageEntity {
       conversationId: json['conversationId'],
       senderId: json['senderId'],
       text: json['text'],
-      image: json['image'] ?? "",
+      image: (json['image'] as List?)?.cast<String>() ?? [],
       createAt: DateTime.parse(json['createdAt']),
     );
   }

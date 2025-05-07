@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
             io.to(conversationId).emit("newMessage", send);
             io.emit("updateConversations", {
                 conversationId,
-                lastMessage: send.text,
+                lastMessage: send.text || (send.image.length > 0 ? "images" : ""),
                 lastMessageTime: send.createdAt,
             });
         } catch (error) {
