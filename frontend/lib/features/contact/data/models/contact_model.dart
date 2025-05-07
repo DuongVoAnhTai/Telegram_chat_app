@@ -5,13 +5,15 @@ class ContactModel extends ContactEntity {
     required String id,
     required String name,
     required String email,
-  }) : super(id: id, name: name, email: email);
+    required String userId,
+  }) : super(id: id, name: name, email: email, userId: userId);
 
   factory ContactModel.fromJson(Map<String, dynamic> json) {
     return ContactModel(
       id: json['_id'] as String,
       name: json['contactId']['fullName'] as String,
       email: json['contactId']['email'] as String,
+      userId: json['contactId']['_id'],
     );
   }
 }

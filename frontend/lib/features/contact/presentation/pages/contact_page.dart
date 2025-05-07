@@ -49,7 +49,7 @@ class _ContactPageState extends State<ContactPage> {
                     onTap: () {
                       BlocProvider.of<ContactBloc>(context).add(
                         CheckCreateConverstaion(
-                          state.contacts[index].id,
+                          state.contacts[index].userId,
                           state.contacts[index].name,
                         ),
                       );
