@@ -18,6 +18,11 @@ class AuthRemoteDataSource {
       headers: {'Content-Type': 'application/json'},
     );
 
+    if (response.statusCode != 200) {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Failed to login');
+    }
+
     return UserModel.fromJson(jsonDecode(response.body));
   }
 
@@ -55,11 +60,8 @@ class AuthRemoteDataSource {
 
     if (response.statusCode == 200) {
       final userData = jsonDecode(response.body);
-      debugPrint('User profile response: $userData'); 
-      return UserModel.fromJson({
-        ...userData,
-        'token': token,
-      });
+      debugPrint('User profile response: $userData');
+      return UserModel.fromJson({...userData, 'token': token});
     } else {
       final error = jsonDecode(response.body);
       throw Exception(error['message'] ?? 'Failed to get user profile');
@@ -82,7 +84,7 @@ class AuthRemoteDataSource {
     if (bio != null) updateData['bio'] = bio;
     if (dob != null) updateData['dob'] = dob.toIso8601String();
     if (profilePic != null) updateData['profilePic'] = profilePic;
-      print('UPDATEDATA: ${updateData}');
+    print('UPDATEDATA: ${updateData}');
 
     final response = await http.put(
       Uri.parse('$baseUrl/update'),
@@ -95,10 +97,7 @@ class AuthRemoteDataSource {
 
     if (response.statusCode == 200) {
       final updatedUserData = jsonDecode(response.body);
-      return UserModel.fromJson({
-        ...updatedUserData,
-        'token': token,
-      });
+      return UserModel.fromJson({...updatedUserData, 'token': token});
     } else {
       final error = jsonDecode(response.body);
       throw Exception(error['message'] ?? 'Failed to update profile');

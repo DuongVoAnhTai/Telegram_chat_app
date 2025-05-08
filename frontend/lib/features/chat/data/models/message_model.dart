@@ -18,6 +18,7 @@ class MessageModel extends MessageEntity {
        );
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
+    // print("type of image: ${json['image'].runtimeType}");
     return MessageModel(
       id: json['_id'],
       conversationId: json['conversationId'],

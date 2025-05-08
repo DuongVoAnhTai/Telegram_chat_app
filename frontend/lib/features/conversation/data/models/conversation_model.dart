@@ -19,11 +19,7 @@ class ConversationModel extends ConversationEntity {
         savedMessagesId: savedMessagesId,
        );
 
-  factory ConversationModel.fromJson(Map<String, dynamic> json) {
-    final _storage = TokenStorageService();
-    final userId = _storage.getUserId();
-    final participants = json['participants'] as List<dynamic>;
-    final names = participants.where((p) => p['_id'] != userId).map((p) => p['fullName'].toString()).join(", ");
+  factory ConversationModel.fromJson(Map<String, dynamic> json, String names) {
     return ConversationModel(
       id: json['_id'],
       participantName: names,

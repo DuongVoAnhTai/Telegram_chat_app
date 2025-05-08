@@ -33,6 +33,10 @@ class ContactRemoteDataSource {
       },
     );
 
+    if (response.statusCode == 404) {
+      throw Exception('User not found');
+    }
+
     if (response.statusCode != 201) {
       throw Exception('Failed to add contact');
     }

@@ -57,7 +57,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   Future<void> _onReceiveMessage(ReceiveMessagesEvent event, Emitter<ChatState> emit) async {
     print("step2: receive event called");
     print(event.message);
-    final message =  MessageEntity(image: event.message['image'], id: event.message['_id'], conversationId: event.message['conversationId'], senderId: event.message['senderId'], text: event.message['text'], createAt: DateTime.parse(event.message['createdAt']));
+    final message =  MessageEntity(image: (event.message['image'] as List?)?.map((e) => e.toString()).toList() ?? [], id: event.message['_id'], conversationId: event.message['conversationId'], senderId: event.message['senderId'], text: event.message['text'], createAt: DateTime.parse(event.message['createdAt']));
     _messages.add(message);
     emit(ChatLoadedState(List.from(_messages)));
   }

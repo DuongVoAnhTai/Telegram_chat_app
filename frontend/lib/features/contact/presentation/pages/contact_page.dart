@@ -4,6 +4,8 @@ import "package:frontend/features/contact/presentation/bloc/contact_event.dart";
 import "package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart";
 import "package:frontend/features/conversation/presentation/bloc/conversation_event.dart";
 import "package:go_router/go_router.dart";
+import "package:frontend/features/auth/presentation/bloc/auth_bloc.dart";
+import "package:frontend/features/auth/presentation/bloc/auth_state.dart";
 
 import "../bloc/contact_bloc.dart";
 import "../bloc/contact_state.dart";
@@ -33,6 +35,31 @@ class _ContactPageState extends State<ContactPage> {
             context.push(
               "/chat-page?id=${state.conversatoinId}&mate=${state.name}",
             );
+          } else if (state is ContactAdded) {
+            // After contact is added successfully, fetch the updated list
+            BlocProvider.of<ContactBloc>(context).add(FetchContacts());
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Contact added successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (state is ContactError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+                action: SnackBarAction(
+                  label: 'Dismiss',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                ),
+              ),
+            );
+            BlocProvider.of<ContactBloc>(context).add(FetchContacts());
           }
         },
         child: BlocBuilder<ContactBloc, ContactState>(
@@ -57,8 +84,6 @@ class _ContactPageState extends State<ContactPage> {
                   );
                 },
               );
-            } else if (state is ContactError) {
-              return Center(child: Text(state.message));
             } else {
               return const Center(child: Text("No contacts found"));
             }
@@ -74,39 +99,71 @@ class _ContactPageState extends State<ContactPage> {
 
   void _showAddContactDialog(BuildContext context) {
     final emailController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: Text('Add contact'),
-            content: TextField(
-              controller: emailController,
-              decoration: InputDecoration(hintText: 'Enter contact email'),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  //Navigate back
-                  context.pop();
-                },
-                child: Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  final email = emailController.text.trim();
-                  if (email.isNotEmpty) {
-                    BlocProvider.of<ContactBloc>(
-                      context,
-                    ).add(AddContact(email));
-                    BlocProvider.of<ContactBloc>(context).add(FetchContacts());
-                    //Navigate back
-                    context.pop();
-                  }
-                },
-                child: Text('Add'),
-              ),
-            ],
+          (context) => BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, authState) {
+              String? currentUserEmail;
+              if (authState is ProfileLoaded) {
+                currentUserEmail = authState.user.email;
+              }
+
+              return AlertDialog(
+                title: const Text('Add contact'),
+                content: Form(
+                  key: formKey,
+                  child: TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter contact email',
+                      labelText: 'Email',
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter an email';
+                      }
+                      // Basic email validation
+                      final emailRegex = RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      );
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      // Check if user is trying to add their own email
+                      if (currentUserEmail != null &&
+                          value.trim() == currentUserEmail) {
+                        return 'You cannot add your own email';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        final email = emailController.text.trim();
+                        BlocProvider.of<ContactBloc>(
+                          context,
+                        ).add(AddContact(email));
+                        context.pop();
+                      }
+                    },
+                    child: const Text('Add'),
+                  ),
+                ],
+              );
+            },
           ),
     );
   }

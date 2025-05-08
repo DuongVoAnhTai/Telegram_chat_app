@@ -15,25 +15,32 @@ class ConversationRemoteDataSource {
       Uri.parse('$baseUrl/fetchConversation/$userId'),
       headers: {"Authorization": "Bearer $token"},
     );
-    print("userId: ");
-    print(userId);
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
       print(jsonEncode(data));
+      var names = "";
+      for (var item in data) {
+        final participants = item['participants'] as List<dynamic>;
 
-      List<ConversationModel> conversations = data.map((json) => ConversationModel.fromJson(json)).toList();
+        names = participants
+            .where((p) => p['_id'] != userId)
+            .map((p) => p['fullName'].toString())
+            .join(", ");
+      }
+      List<ConversationModel> conversations =
+          data.map((json) => ConversationModel.fromJson(json, names)).toList();
 
-          // Tìm conversation có savedMessagesId và lưu xuống store
-          for (var convo in conversations) {
-            print(convo.savedMessagesId?? "DEO CO CAI CON ME GI HETTTTTTT");
-            if (convo.savedMessagesId.isNotEmpty) {
+      // Tìm conversation có savedMessagesId và lưu xuống store
+      for (var convo in conversations) {
+        print(convo.savedMessagesId ?? "DEO CO CAI CON ME GI HETTTTTTT");
+        if (convo.savedMessagesId.isNotEmpty) {
           await _storage.saveSavedMessages(convo.savedMessagesId);
           break; // Nếu chỉ cần lưu một cái đầu tiên
         }
       }
 
-      return conversations; 
+      return conversations;
     } else {
       throw Exception('Failed to fetch conversations');
     }
