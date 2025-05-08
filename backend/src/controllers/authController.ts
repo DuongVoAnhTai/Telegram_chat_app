@@ -6,11 +6,14 @@ import jwt from 'jsonwebtoken';
 import { config } from 'dotenv'
 import cloudinary from "../config/cloudinary";
 import { createNewConversationSavedMessageForNewUser } from "./conversationController";
+import { StreamChat } from 'stream-chat';
 
 config();
 
 const SALT_ROUNDS: number = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'appsecretkey';
+
+const serverClient = StreamChat.getInstance(process.env.STREAM_API_KEY!, process.env.STREAM_API_SECRET!);
 
 export const register = async (req: Request, res: Response) => {
     const { fullName, email, password } = req.body;
@@ -111,8 +114,8 @@ export const updateProfile = async (req: any, res: any) => {
             updateData.profilePic = profilePic;
         }
 
-         // Cập nhật ten nếu có
-         if (fullName !== undefined) {
+        // Cập nhật ten nếu có
+        if (fullName !== undefined) {
             updateData.fullName = fullName;
         }
 
@@ -121,8 +124,8 @@ export const updateProfile = async (req: any, res: any) => {
             updateData.bio = bio;
         }
 
-         // Cập nhật dob nếu có
-         if (dob !== undefined) {
+        // Cập nhật dob nếu có
+        if (dob !== undefined) {
             updateData.dob = dob;
         }
 
@@ -168,5 +171,20 @@ export const generateCloudinarySignature = async (req: any, res: any) => {
     } catch (error) {
         console.error('Signature generation error:', error);
         res.status(500).json({ message: 'Failed to generate signature' });
+    }
+};
+
+export const getStreamToken = async (req: any, res: any) => {
+    try {
+        const userId = req.user._id.toString();
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const token = serverClient.createToken(userId);
+        res.status(200).json({ token });
+    } catch (error) {
+        console.error('Error generating Stream token:', error);
+        res.status(500).json({ message: 'Failed to generate Stream token' });
     }
 };

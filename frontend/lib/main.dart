@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/design_system/theme/theme.dart';
 import 'package:frontend/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:frontend/features/auth/data/repositories/auth_repository_impl.dart';
@@ -23,6 +24,7 @@ import 'package:frontend/features/conversation/domain/usecase/check_create_use_c
 import 'package:frontend/features/conversation/domain/usecase/create_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
+
 // import 'package:frontend/features/conversation/presentation/pages/message_page.dart';
 // import 'package:frontend/widgets/screen/chat/chat_page.dart';
 import 'core/navigation/routers.dart';
@@ -88,8 +90,12 @@ class ChatApp extends StatelessWidget {
               (_) => AuthBloc(
                 registerUseCase: RegisterUseCase(repository: authRepository),
                 loginUseCase: LoginUseCase(repository: authRepository),
-                getUserProfileUseCase: GetUserProfileUseCase(repository: authRepository),
-                updateProfileUseCase: UpdateProfileUseCase(repository: authRepository),
+                getUserProfileUseCase: GetUserProfileUseCase(
+                  repository: authRepository,
+                ),
+                updateProfileUseCase: UpdateProfileUseCase(
+                  repository: authRepository,
+                ),
               ),
         ),
         BlocProvider(
