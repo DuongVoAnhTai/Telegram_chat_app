@@ -63,7 +63,7 @@ export const createConversation = async (req: any, res: any) => {
 export const getUserConversations = async (req: Request, res: Response) => {
     try {
         const { id: userId } = req.params;
-        const conversations = await Conversation.find({ participants: { $in: [userId] } }).populate("participants", "fullName");
+        const conversations = await Conversation.find({ participants: { $in: [userId] } }).populate("participants", "fullName profilePic");
         res.status(200).json(conversations);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch conversations', error });

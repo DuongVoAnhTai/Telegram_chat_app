@@ -36,7 +36,8 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final conversationId = state.uri.queryParameters['id'] ?? 'defaultId';
         final mate = state.uri.queryParameters['mate'] ?? 'mate';
-        return ChatPage(conversationId: conversationId, mate: mate);
+        final profilePic = state.uri.queryParameters['profilePic'];
+        return ChatPage(conversationId: conversationId, mate: mate, profilePic: profilePic,);
       },
     ),
     GoRoute(path: '/contact-page', builder: (context, state) => ContactPage()),

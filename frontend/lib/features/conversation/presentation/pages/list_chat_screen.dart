@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/core/helpers/constants.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/features/conversation/domain/entities/conversation_entity.dart';
 
 import '../../../../core/design_system/theme/theme.dart';
 import '../bloc/conversation_bloc.dart';
@@ -240,13 +241,14 @@ class _ListChatScreenState extends State<ListChatScreen> {
                             //   ),
                             // );
                             context.push(
-                              "/chat-page?id=${conversation.id}&mate=${conversation.conversationName}",
+                              "/chat-page?id=${conversation.id}&mate=${conversation.conversationName}&profilePic=${conversation.profilePic ?? ''}",
                             );
                           },
                           child: _buildMessageTile(
                             conversation.conversationName,
                             conversation.lastMessage,
                             conversation.lastMessageTime.toString(),
+                            conversation,
                           ),
                         );
                       },
@@ -281,15 +283,27 @@ class _ListChatScreenState extends State<ListChatScreen> {
     );
   }
 
-  Widget _buildMessageTile(String name, String message, String time) {
+  Widget _buildMessageTile(
+    String name,
+    String message,
+    String time,
+    ConversationEntity conversation,
+  ) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       leading: CircleAvatar(
         backgroundColor: AppColors.primaryColor,
-        child: Text(
-          name[0][0].toUpperCase(),
-          style: const TextStyle(color: AppColors.white),
-        ),
+        backgroundImage:
+            conversation.profilePic != null
+                ? NetworkImage(conversation.profilePic!)
+                : null,
+        child:
+            conversation.profilePic == null
+                ? Text(
+                  name[0][0].toUpperCase(),
+                  style: const TextStyle(color: AppColors.white),
+                )
+                : null,
       ),
       title: Text(
         name,

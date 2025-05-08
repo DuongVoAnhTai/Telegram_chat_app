@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:frontend/core/helpers/constants.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:frontend/features/chat/presentation/bloc/chat_state.dart';
@@ -19,7 +20,8 @@ import '../bloc/chat_event.dart';
 class ChatPage extends StatefulWidget {
   final String conversationId;
   final String mate;
-  const ChatPage({required this.conversationId, required this.mate, super.key});
+  final String? profilePic;
+  const ChatPage({required this.conversationId, required this.mate, this.profilePic, super.key,});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -178,15 +180,21 @@ class _ChatPageState extends State<ChatPage> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(
-                "https://asset.brandfetch.io/id1t-fbPVK/idSLhuZ0RF.png?updated=1635888650006",
-              ),
+              backgroundColor: AppColors.primaryColor,
+              backgroundImage:
+                  widget.profilePic != null
+                      ? NetworkImage(widget.profilePic!)
+                      : null,
+              child:
+                  widget.profilePic == null
+                      ? Text(
+                        widget.mate[0].toUpperCase(),
+                        style: const TextStyle(color: AppColors.white),
+                      )
+                      : null,
             ),
             SizedBox(width: 10),
-            Text(
-              "${widget.mate}",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(widget.mate),
           ],
         ),
         backgroundColor: Colors.transparent,
