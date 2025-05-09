@@ -1,9 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../conversation/domain/usecase/check_create_use_case.dart';
-import '../../../conversation/presentation/bloc/conversation_event.dart';
-import '../../domain/repositories/contact_repository.dart';
 import '../../domain/usecase/add_contact_use_case.dart';
+import '../../domain/usecase/delete_contact_use_case.dart';
 import '../../domain/usecase/fetch_contact_use_case.dart';
 import 'contact_event.dart';
 import 'contact_state.dart';
@@ -12,15 +11,18 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
   final FetchContactUseCase fetchContactUserCase;
   final AddContactUseCase addContactUseCase;
   final CheckCreateUseCase checkCreateUseCase;
+  final DeleteContactUseCase deleteContactUseCase;
 
   ContactBloc({
     required this.fetchContactUserCase,
     required this.addContactUseCase,
     required this.checkCreateUseCase,
+    required this.deleteContactUseCase,
   }) : super(ContactInitial()) {
     on<FetchContacts>(_onFetchContacts);
     on<AddContact>(_onAddContact);
     on<CheckCreateConverstaion>(_onCheckCreateConverstaion);
+    on<DeleteContact>(_onDeleteContact);
   }
 
   Future<void> _onFetchContacts(
@@ -58,6 +60,18 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
       final conversationId = await checkCreateUseCase(event.contactId);
 
       emit(ConversationReady(conversationId, event.name));
+    } catch (error) {
+      emit(ContactError(error.toString()));
+    }
+  }
+
+  Future<void> _onDeleteContact(
+    DeleteContact event,
+    Emitter<ContactState> emit,
+  ) async {
+    try {
+      await deleteContactUseCase(event.contactId);
+      add(FetchContacts()); // Refresh the contact list
     } catch (error) {
       emit(ContactError(error.toString()));
     }

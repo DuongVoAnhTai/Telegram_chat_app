@@ -25,4 +25,9 @@ class ContactRepositoryImpl implements ContactRepository {
       throw Exception('Error adding contact: $e');
     }
   }
+
+  @override
+  Future<void> deleteContact(String contactId) async {
+    return await datasource.deleteContact(contactId);
+  }
 }

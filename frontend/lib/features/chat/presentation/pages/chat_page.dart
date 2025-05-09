@@ -11,6 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:frontend/features/chat/presentation/pages/call_screen.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
+import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 
 import '../../../../core/design_system/theme/theme.dart';
 import '../bloc/chat_bloc.dart';
@@ -93,8 +95,6 @@ class _ChatPageState extends State<ChatPage> {
     }
     _messageController.clear();
   }
-
-  void _startVoiceCall() async {}
 
   void _startVideoCall() async {
     try {
@@ -193,16 +193,84 @@ class _ChatPageState extends State<ChatPage> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.call, color: Colors.grey),
-          ),
-          IconButton(
             onPressed: _startVideoCall,
             icon: Icon(Icons.videocam, color: Colors.grey),
           ),
           IconButton(
             onPressed: () {},
             icon: Icon(Icons.search, color: Colors.grey),
+          ),
+          Builder(
+            builder:
+                (context) => PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: Colors.grey),
+                  position: PopupMenuPosition.under,
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Delete Conversation'),
+                            content: Text(
+                              'Are you sure you want to delete this conversation? This action cannot be undone.',
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  BlocProvider.of<ConversationBloc>(
+                                    context,
+                                  ).add(
+                                    DeleteConversation(widget.conversationId),
+                                  );
+                                  Navigator.of(context).pop(); // Close dialog
+                                  Navigator.of(
+                                    context,
+                                  ).pop(); // Go back to conversation page
+                                },
+                                child: Text(
+                                  'Delete',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
+                  itemBuilder:
+                      (BuildContext context) => [
+                        PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text(
+                                'Delete Conversation',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                ),
           ),
         ],
       ),
@@ -225,6 +293,7 @@ class _ChatPageState extends State<ChatPage> {
                           context,
                           message.text,
                           message.image,
+                          message.id,
                         );
                       } else {
                         return _buildReceivedMessage(
@@ -295,40 +364,69 @@ class _ChatPageState extends State<ChatPage> {
     BuildContext context,
     String mess,
     List<String>? images,
+    String messageId,
   ) {
     return Align(
       alignment: Alignment.centerRight,
-      child: Container(
-        margin: EdgeInsets.only(right: 38, top: 5, bottom: 5),
-        padding: EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: DefaultColors.receiverMessage,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (mess.isNotEmpty)
-              Text(mess, style: Theme.of(context).textTheme.bodyMedium),
-            if (images != null && images.isNotEmpty) ...[
-              SizedBox(height: 8),
-              for (var image in images)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      image,
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (context, error, stackTrace) => Icon(Icons.error),
+      child: GestureDetector(
+        onLongPress: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Delete Message'),
+                content: Text('Are you sure you want to delete this message?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      BlocProvider.of<ChatBloc>(context).add(
+                        DeleteMessageEvent(messageId, widget.conversationId),
+                      );
+                    },
+                    child: Text('Delete'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Container(
+          margin: EdgeInsets.only(right: 38, top: 5, bottom: 5),
+          padding: EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: DefaultColors.receiverMessage,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (mess.isNotEmpty)
+                Text(mess, style: Theme.of(context).textTheme.bodyMedium),
+              if (images != null && images.isNotEmpty) ...[
+                SizedBox(height: 8),
+                for (var image in images)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        image,
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (context, error, stackTrace) => Icon(Icons.error),
+                      ),
                     ),
                   ),
-                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

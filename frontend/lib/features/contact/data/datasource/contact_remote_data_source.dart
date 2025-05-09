@@ -41,4 +41,16 @@ class ContactRemoteDataSource {
       throw Exception('Failed to add contact');
     }
   }
+
+  Future<void> deleteContact(String contactId) async {
+    final token = await _storage.getToken();
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$contactId'),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete contact');
+    }
+  }
 }

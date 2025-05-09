@@ -19,6 +19,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }) : super(ConversationInitial()) {
     on<FetchConversations>(_onFetchConversations);
     on<CreateConversation>(_onCreateConversation);
+    on<DeleteConversation>(_onDeleteConversation);
     _initSocketListeners();
   }
 
@@ -54,6 +55,18 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(ConversationCreating());
     try {
       await createConversationUseCase(event.participantId);
+    } catch (error) {
+      emit(ConversationError(error.toString()));
+    }
+  }
+
+  Future<void> _onDeleteConversation(
+    DeleteConversation event,
+    Emitter<ConversationState> emit,
+  ) async {
+    try {
+      _socketService.socket.emit('deleteConversation', event.conversationId);
+      add(FetchConversations());
     } catch (error) {
       emit(ConversationError(error.toString()));
     }

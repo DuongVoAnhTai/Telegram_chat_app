@@ -3,6 +3,8 @@ import http from 'http';
 import express from 'express';
 import { sendMessage } from '../controllers/messageController';
 import { sendMessageLogic } from './messageService';
+import Message from '../models/messageModel';
+import Conversation from '../models/conversationModel';
 
 const app = express();
 const server = http.createServer(app);
@@ -36,6 +38,36 @@ io.on("connection", (socket) => {
         } catch (error) {
             console.error("Error sending message:", error);
             return;
+        }
+    });
+
+    socket.on("deleteMessage", async (data) => {
+        const { messageId, conversationId } = data;
+        try {
+            await Message.findByIdAndDelete(messageId);
+            var conversation = await Conversation.findById(conversationId);
+            if (conversation) {
+                conversation.lastMessage = "deleted";
+                await conversation.save();
+            }
+            io.to(conversationId).emit("messageDeleted", { messageId });
+            io.emit("updateConversations", {
+                conversationId,
+                lastMessage: "deleted",
+                lastMessageTime: new Date(),
+            });
+        } catch (error) {
+            console.error("Error deleting message:", error);
+        }
+    });
+
+    socket.on("deleteConversation", async (conversationId) => {
+        try {
+            await Message.deleteMany({ conversationId: conversationId });
+            await Conversation.findByIdAndDelete(conversationId);
+            io.emit("updateConversations");
+        } catch (error) {
+            console.error("Error deleting conversation:", error);
         }
     });
 

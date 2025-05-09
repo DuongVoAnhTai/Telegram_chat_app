@@ -13,3 +13,8 @@ class CheckCreateConverstaion extends ContactEvent {
   final String name;
   CheckCreateConverstaion(this.contactId, this.name);
 }
+
+class DeleteContact extends ContactEvent {
+  final String contactId;
+  DeleteContact(this.contactId);
+}

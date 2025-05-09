@@ -16,3 +16,9 @@ class ReceiveMessagesEvent extends ChatEvent {
   final Map<String, dynamic> message;
   ReceiveMessagesEvent(this.message);
 }
+
+class DeleteMessageEvent extends ChatEvent {
+  final String messageId;
+  final String conversationId;
+  DeleteMessageEvent(this.messageId, this.conversationId);
+}

@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/design_system/theme/theme.dart';
 import 'package:frontend/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:frontend/features/auth/data/repositories/auth_repository_impl.dart';
@@ -13,26 +12,21 @@ import 'package:frontend/features/auth/domain/usecases/update_profile_use_case.d
 import 'package:frontend/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:frontend/features/contact/data/datasource/contact_remote_data_source.dart';
 import 'package:frontend/features/contact/data/repositories/contact_repository_imp.dart';
-import 'package:frontend/features/contact/domain/repositories/contact_repository.dart';
 import 'package:frontend/features/contact/domain/usecase/add_contact_use_case.dart';
 import 'package:frontend/features/contact/domain/usecase/fetch_contact_use_case.dart';
-// import 'package:frontend/features/auth/presentation/pages/login_page.dart';
-// import 'package:frontend/features/auth/presentation/pages/register_page.dart';
 import 'package:frontend/features/conversation/data/datasources/conversation_remote_data_source.dart';
 import 'package:frontend/features/conversation/data/repositories/conversation_repository_impl.dart';
 import 'package:frontend/features/conversation/domain/usecase/check_create_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/create_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
-
-// import 'package:frontend/features/conversation/presentation/pages/message_page.dart';
-// import 'package:frontend/widgets/screen/chat/chat_page.dart';
 import 'core/navigation/routers.dart';
 import 'core/services/socket.dart';
 import 'features/chat/data/datasources/message_remote_data_source.dart';
 import 'features/chat/data/repositories/message_repository.dart';
 import 'features/chat/domain/usecases/fetch_message_use_case.dart';
 import 'features/chat/presentation/bloc/chat_bloc.dart';
+import 'features/contact/domain/usecase/delete_contact_use_case.dart';
 import 'features/contact/presentation/bloc/contact_bloc.dart';
 
 Future<void> main() async {
@@ -121,6 +115,7 @@ class ChatApp extends StatelessWidget {
                 fetchContactUserCase: FetchContactUseCase(contactRepository),
                 addContactUseCase: AddContactUseCase(contactRepository),
                 checkCreateUseCase: CheckCreateUseCase(conversationRepository),
+                deleteContactUseCase: DeleteContactUseCase(contactRepository),
               ),
         ),
       ],

@@ -81,6 +81,45 @@ class _ContactPageState extends State<ContactPage> {
                         ),
                       );
                     },
+                    onLongPress: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Delete Contact'),
+                            content: Text(
+                              'Are you sure you want to delete this contact? This will also delete all conversations and messages with this contact.',
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  BlocProvider.of<ContactBloc>(context).add(
+                                    DeleteContact(state.contacts[index].id),
+                                  );
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  'Delete',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
                   );
                 },
               );

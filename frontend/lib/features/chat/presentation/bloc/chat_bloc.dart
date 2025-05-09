@@ -17,9 +17,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<LoadMessageEvent>(_onLoadMessage);
     on<SendMessagesEvent>(_onSendMessage);
     on<ReceiveMessagesEvent>(_onReceiveMessage);
+    on<DeleteMessageEvent>(_onDeleteMessage);
   }
 
-  Future<void> _onLoadMessage(LoadMessageEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onLoadMessage(
+    LoadMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     emit(ChatLoadingState());
     try {
       final messages = await fetchMessageUseCase(event.conversationId);
@@ -38,7 +42,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  Future<void> _onSendMessage(SendMessagesEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onSendMessage(
+    SendMessagesEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     String userId = await _storage.read(key: 'userId') ?? '';
     print('userId: $userId');
 
@@ -54,11 +61,43 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _socketService.socket.emit('sendMessage', newMessage);
   }
 
-  Future<void> _onReceiveMessage(ReceiveMessagesEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onReceiveMessage(
+    ReceiveMessagesEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     print("step2: receive event called");
     print(event.message);
-    final message =  MessageEntity(image: (event.message['image'] as List?)?.map((e) => e.toString()).toList() ?? [], id: event.message['_id'], conversationId: event.message['conversationId'], senderId: event.message['senderId'], text: event.message['text'], createAt: DateTime.parse(event.message['createdAt']));
+    final message = MessageEntity(
+      image:
+          (event.message['image'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      id: event.message['_id'],
+      conversationId: event.message['conversationId'],
+      senderId: event.message['senderId'],
+      text: event.message['text'],
+      createAt: DateTime.parse(event.message['createdAt']),
+    );
     _messages.add(message);
     emit(ChatLoadedState(List.from(_messages)));
+  }
+
+  Future<void> _onDeleteMessage(
+    DeleteMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    try {
+      _socketService.socket.emit('deleteMessage', {
+        'messageId': event.messageId,
+        'conversationId': event.conversationId,
+      });
+
+      // Remove message from local list
+      _messages.removeWhere((message) => message.id == event.messageId);
+      emit(ChatLoadedState(List.from(_messages)));
+    } catch (error) {
+      emit(ChatErrorState('Error deleting message: $error'));
+    }
   }
 }
