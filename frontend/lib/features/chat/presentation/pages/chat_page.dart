@@ -23,7 +23,12 @@ class ChatPage extends StatefulWidget {
   final String conversationId;
   final String mate;
   final String? profilePic;
-  const ChatPage({required this.conversationId, required this.mate, this.profilePic, super.key,});
+  const ChatPage({
+    required this.conversationId,
+    required this.mate,
+    this.profilePic,
+    super.key,
+  });
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -31,10 +36,13 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   final _storage = FlutterSecureStorage();
   String userId = '';
   List<File> _selectedImages = []; // Store multiple picked images for preview
   bool _isUploading = false; // Track upload state
+  bool _isSearching = false;
+  List<dynamic> _filteredMessages = [];
 
   @override
   void initState() {
@@ -43,6 +51,7 @@ class _ChatPageState extends State<ChatPage> {
       context,
     ).add(LoadMessageEvent(widget.conversationId));
     fetchUserUI();
+    _searchController.addListener(_filterMessages);
   }
 
   fetchUserUI() async {
@@ -55,7 +64,15 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     _messageController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _filterMessages() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _isSearching = query.isNotEmpty;
+    });
   }
 
   void _sendMessage() async {
@@ -205,8 +222,18 @@ class _ChatPageState extends State<ChatPage> {
             icon: Icon(Icons.videocam, color: Colors.grey),
           ),
           IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.search, color: Colors.grey),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                }
+              });
+            },
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: Colors.grey,
+            ),
           ),
           Builder(
             builder:
@@ -284,17 +311,96 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Column(
         children: [
+          // Search bar
+          if (_isSearching)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search in messages...',
+                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  suffixIcon:
+                      _searchController.text.isNotEmpty
+                          ? IconButton(
+                            icon: Icon(Icons.clear, color: Colors.grey),
+                            onPressed: () {
+                              _searchController.clear();
+                            },
+                          )
+                          : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+                autofocus: true,
+              ),
+            ),
           Expanded(
             child: BlocBuilder<ChatBloc, ChatState>(
               builder: (context, state) {
                 if (state is ChatLoadingState) {
                   return Center(child: CircularProgressIndicator());
                 } else if (state is ChatLoadedState) {
+                  // Filter messages if searching
+                  _filteredMessages =
+                      _isSearching
+                          ? state.messages
+                              .where(
+                                (message) =>
+                                    message.text.toLowerCase().contains(
+                                      _searchController.text.toLowerCase(),
+                                    ),
+                              )
+                              .toList()
+                          : state.messages;
+
+                  if (_filteredMessages.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _isSearching
+                                ? Icons.search_off
+                                : Icons.chat_bubble_outline,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            _isSearching
+                                ? "No messages found"
+                                : "No messages yet",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return ListView.builder(
                     padding: EdgeInsets.all(20),
-                    itemCount: state.messages.length,
+                    itemCount: _filteredMessages.length,
                     itemBuilder: (context, index) {
-                      final message = state.messages[index];
+                      final message = _filteredMessages[index];
                       final isSentMessage = message.senderId == userId;
                       if (isSentMessage) {
                         return _buildSentMessage(

@@ -33,42 +33,14 @@ class ListChatScreen extends StatefulWidget {
 }
 
 class _ListChatScreenState extends State<ListChatScreen> {
-  // Sample user data
-  final List<User> _allUsers = [
-    User(
-      name: "User 1",
-      initial: "U",
-      lastMessage: "Hello there!",
-      lastMessageTime: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-    User(
-      name: "User 2",
-      initial: "U",
-      lastMessage: "When will you be available?",
-      lastMessageTime: DateTime.now().subtract(const Duration(hours: 1)),
-    ),
-    User(
-      name: "User 3",
-      initial: "U",
-      lastMessage: "Thanks for your help",
-      lastMessageTime: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    User(
-      name: "User 4",
-      initial: "U",
-      lastMessage: "See you tomorrow",
-      lastMessageTime: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-  ];
-
-  List<User> _filteredUsers = [];
   final TextEditingController _searchController = TextEditingController();
+  List<ConversationEntity> _filteredConversations = [];
+  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    _filteredUsers = _allUsers;
-    _searchController.addListener(_filterUsers);
+    _searchController.addListener(_filterConversations);
     BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
   }
 
@@ -78,13 +50,10 @@ class _ListChatScreenState extends State<ListChatScreen> {
     super.dispose();
   }
 
-  void _filterUsers() {
+  void _filterConversations() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      _filteredUsers =
-          _allUsers
-              .where((user) => user.name.toLowerCase().contains(query))
-              .toList();
+      _isSearching = query.isNotEmpty;
     });
   }
 
@@ -111,105 +80,37 @@ class _ListChatScreenState extends State<ListChatScreen> {
       backgroundColor: AppColors.backgroundColor,
       body: Column(
         children: [
-          // Search bar with improved styling
-          // Padding(
-          //   padding: const EdgeInsets.all(AppSizes.padding),
-          //   child: TextField(
-          //     controller: _searchController,
-          //     decoration: InputDecoration(
-          //       hintText: "Search users...",
-          //       prefixIcon: const Icon(
-          //         Icons.search,
-          //         color: AppColors.primaryColor,
-          //       ),
-          //       filled: true,
-          //       fillColor: AppColors.white,
-          //       border: OutlineInputBorder(
-          //         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-          //         borderSide: BorderSide.none,
-          //       ),
-          //       contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
-          //       suffixIcon:
-          //           _searchController.text.isNotEmpty
-          //               ? IconButton(
-          //                 icon: const Icon(Icons.clear),
-          //                 onPressed: () {
-          //                   _searchController.clear();
-          //                 },
-          //               )
-          //               : null,
-          //     ),
-          //   ),
-          // ),
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.all(AppSizes.padding),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: "Search conversations...",
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.primaryColor,
+                ),
+                filled: true,
+                fillColor: AppColors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                suffixIcon:
+                    _searchController.text.isNotEmpty
+                        ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                          },
+                        )
+                        : null,
+              ),
+            ),
+          ),
 
-          // Empty state
-          // if (_filteredUsers.isEmpty)
-          //   Expanded(
-          //     child: Center(
-          //       child: Column(
-          //         mainAxisAlignment: MainAxisAlignment.center,
-          //         children: [
-          //           Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
-          //           const SizedBox(height: 16),
-          //           Text(
-          //             "No users found",
-          //             style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-
-          // Chat list with improved styling
-          // if (_filteredUsers.isNotEmpty)
-          //   Expanded(
-          //     child: ListView.separated(
-          //       itemCount: _filteredUsers.length,
-          //       separatorBuilder: (context, index) => const Divider(height: 1),
-          //       itemBuilder: (context, index) {
-          //         final user = _filteredUsers[index];
-          //         return ListTile(
-          //           leading: CircleAvatar(
-          //             backgroundColor: AppColors.primaryColor,
-          //             child: Text(
-          //               user.initial,
-          //               style: const TextStyle(color: AppColors.white),
-          //             ),
-          //           ),
-          //           title: Text(
-          //             user.name,
-          //             style: const TextStyle(
-          //               color: AppColors.textPrimary,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //           ),
-          //           subtitle:
-          //               user.lastMessage != null
-          //                   ? Text(
-          //                     user.lastMessage!,
-          //                     maxLines: 1,
-          //                     overflow: TextOverflow.ellipsis,
-          //                     style: TextStyle(color: Colors.grey[600]),
-          //                   )
-          //                   : null,
-          //           trailing:
-          //               user.lastMessageTime != null
-          //                   ? Text(
-          //                     _formatLastMessageTime(user.lastMessageTime),
-          //                     style: TextStyle(
-          //                       color: Colors.grey[500],
-          //                       fontSize: 12,
-          //                     ),
-          //                   )
-          //                   : null,
-          //           onTap: () {
-          //             // Navigate to chat screen
-          //             print("Starting chat with ${user.name}");
-          //           },
-          //         );
-          //       },
-          //     ),
-          //   ),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -224,22 +125,59 @@ class _ListChatScreenState extends State<ListChatScreen> {
                   if (state is ConversationLoading) {
                     return Center(child: CircularProgressIndicator());
                   } else if (state is ConversationLoaded) {
+                    // Filter conversations based on search query
+                    _filteredConversations =
+                        _isSearching
+                            ? state.conversations
+                                .where(
+                                  (conversation) =>
+                                      conversation.conversationName
+                                          .toLowerCase()
+                                          .contains(
+                                            _searchController.text
+                                                .toLowerCase(),
+                                          ) ||
+                                      conversation.lastMessage
+                                          .toLowerCase()
+                                          .contains(
+                                            _searchController.text
+                                                .toLowerCase(),
+                                          ),
+                                )
+                                .toList()
+                            : state.conversations;
+
+                    if (_filteredConversations.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _isSearching
+                                  ? "No conversations found"
+                                  : "No conversations yet",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
                     return ListView.builder(
-                      itemCount: state.conversations.length,
+                      itemCount: _filteredConversations.length,
                       itemBuilder: (context, index) {
-                        final conversation = state.conversations[index];
+                        final conversation = _filteredConversations[index];
                         return GestureDetector(
                           onTap: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder:
-                            //         (context) => ChatPage(
-                            //           conversationId: conversation.id,
-                            //           mate: conversation.participantName,
-                            //         ),
-                            //   ),
-                            // );
                             context.push(
                               "/chat-page?id=${conversation.id}&mate=${conversation.conversationName}&profilePic=${conversation.profilePic ?? ''}",
                             );
@@ -247,7 +185,9 @@ class _ListChatScreenState extends State<ListChatScreen> {
                           child: _buildMessageTile(
                             conversation.conversationName,
                             conversation.lastMessage,
-                            conversation.lastMessageTime.toString(),
+                            _formatLastMessageTime(
+                              conversation.lastMessageTime,
+                            ),
                             conversation,
                           ),
                         );
@@ -261,9 +201,11 @@ class _ListChatScreenState extends State<ListChatScreen> {
                       ),
                     );
                   } else {
-                    return Text(
-                      'No conversations found',
-                      style: TextStyle(color: Colors.black),
+                    return Center(
+                      child: Text(
+                        'No conversations found',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     );
                   }
                 },
