@@ -12,7 +12,6 @@ class RecentCallRemoteDataSource {
   Future<List<RecentCallModel>> fetchRecentCalls() async {
     // final token = await _storage.getToken();
     final userId = await _storage.getUserId();
-    print("USER IDDDDDDDDDDDDDD: $userId");
     final response = await http.get(
       Uri.parse("$baseUrl/recentCall/$userId"),
       headers: {
@@ -58,7 +57,7 @@ class RecentCallRemoteDataSource {
       body: body,
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
       throw Exception('Failed to create recent call');
     }
   }
@@ -71,8 +70,8 @@ class RecentCallRemoteDataSource {
     final userId = await _storage.getUserId();
 
     final body = jsonEncode({
-      "userId": userId,
       "conversationId": conversationId,
+      "userId": userId,
     });
 
     final response = await http.post(

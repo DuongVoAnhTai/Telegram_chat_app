@@ -1,6 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/core/services/token.dart';
+import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
+import 'package:frontend/features/recentCallScreen/domain/repositories/recentCall_repository.dart';
+import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_bloc.dart';
+import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_event.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:frontend/features/chat/presentation/bloc/chat_state.dart';
@@ -178,6 +183,10 @@ class _ChatPageState extends State<ChatPage> {
     try {
       _sendVideoCallMessage("started");
 
+      // Gửi recent call về server
+      final recentCallRepo = context.read<RecentcallRepositoryImpl>();
+      await recentCallRepo.createRecentCall(widget.conversationId, 'video');
+
       final client = StreamVideo.instance;
       // Connect the client
       await client.connect();
@@ -196,11 +205,15 @@ class _ChatPageState extends State<ChatPage> {
       // Navigate to call screen
       Navigator.push(
         context,
+
         MaterialPageRoute(
           builder:
               (context) => CallScreen(
                 call: call,
-                onCallEnded: () => _sendVideoCallMessage("ended"),
+                onCallEnded: () {
+                  _sendVideoCallMessage("ended");
+                  recentCallRepo.endRecentCall(widget.conversationId);
+                } 
               ),
         ),
       );

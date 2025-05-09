@@ -24,24 +24,25 @@ export const startCall = async (req: Request, res: Response) => {
 };
 export const endCall = async (req: Request, res: Response) => {
   try {
-    const { callId } = req.body;
+    const { conversationId, userId } = req.body;
 
-    if (!callId) {
-        res.status(400).json({ message: "Missing callId" });
+    if (!conversationId || !userId ) {
+        res.status(400).json({ message: "Missing conversationId or userId" });
       return 
     }
 
-    const updatedCall = await CallLog.findByIdAndUpdate(
-      callId,
+    const updatedCall = await CallLog.findOneAndUpdate(
+      { conversationId: conversationId, userId: userId },
       { endedAt: new Date() },
-      { new: true }
+      { new: true } // Trả về bản ghi đã cập nhật
     );
 
     if (!updatedCall) {
         res.status(404).json({ message: "Call not found" });
       return 
     }
-
+    updatedCall.endedAt = new Date();
+    await updatedCall.save();
     res.status(200).json(updatedCall);
   } catch (error) {
     console.error(error);

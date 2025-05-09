@@ -1,8 +1,8 @@
 import 'package:frontend/features/recentCallScreen/domain/repositories/recentCall_repository.dart';
 
-class EndRecentcallUseCase {
+class EndRecentCallUseCase {
   final RecentCallRepository repository;
-  EndRecentcallUseCase(this.repository);
+  EndRecentCallUseCase(this.repository);
   Future<void> call(String conversationId) async {
     return await repository.endRecentCall(conversationId);
   }

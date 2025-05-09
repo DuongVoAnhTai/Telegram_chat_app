@@ -23,8 +23,11 @@ import 'package:frontend/features/conversation/domain/usecase/fetch_conversation
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
 import 'package:frontend/features/recentCallScreen/data/dataSources/recentCall_remote_data_source.dart';
 import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
+import 'package:frontend/features/recentCallScreen/domain/usecase/create_recentCall_use_case.dart';
+import 'package:frontend/features/recentCallScreen/domain/usecase/end_recentCall_use_case.dart';
 import 'package:frontend/features/recentCallScreen/domain/usecase/fetch_recentCall_use_case.dart';
 import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_video/stream_video.dart';
 import 'core/navigation/routers.dart';
 import 'core/services/socket.dart';
@@ -100,6 +103,10 @@ class ChatApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // Cung cấp RecentcallRepositoryImpl
+        Provider<RecentcallRepositoryImpl>.value(
+          value: recentcallRepository,
+        ),
         BlocProvider(
           create:
               (_) => AuthBloc(
@@ -140,8 +147,11 @@ class ChatApp extends StatelessWidget {
               ),
         ),
         BlocProvider(
-          create: (_) => RecentCallBloc(recentcallRepository,
-           fetchRecentcallUseCase: FetchRecentcallUseCase(recentcallRepository)),
+          create: (_) => RecentCallBloc(
+            fetchRecentcallUseCase: FetchRecentcallUseCase(recentcallRepository),
+             createRecentCallUseCase: CreateRecentCallUseCase(recentcallRepository),
+             endRecentCallUseCase: EndRecentCallUseCase(recentcallRepository)
+          ),
         ),
       ],
       child: MaterialApp.router(
