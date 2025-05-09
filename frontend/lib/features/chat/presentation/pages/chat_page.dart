@@ -199,11 +199,12 @@ class _ChatPageState extends State<ChatPage> {
             CircleAvatar(
               backgroundColor: AppColors.primaryColor,
               backgroundImage:
-                  widget.profilePic != null
+                  widget.profilePic != null &&
+                    widget.profilePic!.isNotEmpty
                       ? NetworkImage(widget.profilePic!)
                       : null,
               child:
-                  widget.profilePic == null
+                  widget.profilePic == null || widget.profilePic!.isEmpty
                       ? Text(
                         widget.mate[0].toUpperCase(),
                         style: const TextStyle(color: AppColors.white),
