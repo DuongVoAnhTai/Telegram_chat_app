@@ -23,6 +23,22 @@ class AuthRemoteDataSource {
       throw Exception(error['message'] ?? 'Failed to login');
     }
 
+    final responseStreamToken = await http.post(
+      Uri.parse('http://10.0.2.2:3000/auth/stream-token'),
+      headers: {
+        'Authorization': 'Bearer ${jsonDecode(response.body)['token']}',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (responseStreamToken.statusCode != 200) {
+      throw Exception('Failed to get Stream Video token');
+    }
+
+    final streamToken = jsonDecode(responseStreamToken.body)['token'];
+
+    _storage.write(key: 'streamToken', value: streamToken);
+
     return UserModel.fromJson(jsonDecode(response.body));
   }
 

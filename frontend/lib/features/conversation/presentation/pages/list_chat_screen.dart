@@ -236,11 +236,12 @@ class _ListChatScreenState extends State<ListChatScreen> {
       leading: CircleAvatar(
         backgroundColor: AppColors.primaryColor,
         backgroundImage:
-            conversation.profilePic != null
+            conversation.profilePic != null &&
+                    conversation.profilePic!.isNotEmpty
                 ? NetworkImage(conversation.profilePic!)
                 : null,
         child:
-            conversation.profilePic == null
+            conversation.profilePic == null || conversation.profilePic!.isEmpty
                 ? Text(
                   name[0][0].toUpperCase(),
                   style: const TextStyle(color: AppColors.white),

@@ -14,6 +14,7 @@ class TokenStorageService {
   static const _tokenKey = 'token';
   static const _userIdKey = 'userId';
   static const _savedMessagesKey = 'savedMessages';
+  static const _streamToken = 'streamToken';
   // 3. Hàm để lưu token vào Secure Storage
   Future<void> saveToken(String token) async {
     try {
@@ -65,6 +66,7 @@ class TokenStorageService {
       return null; // Trả về null nếu có lỗi
     }
   }
+
   Future<void> saveSavedMessages(String savedMessages) async {
     try {
       // Ghi giá trị token vào storage với key đã định nghĩa
@@ -77,6 +79,7 @@ class TokenStorageService {
       // throw Exception('Failed to save token');
     }
   }
+
   Future<String?> getSavedMessages() async {
     try {
       // Đọc giá trị từ storage bằng key đã định nghĩa
@@ -85,6 +88,31 @@ class TokenStorageService {
     } catch (e) {
       // Bắt lỗi nếu có vấn đề khi đọc
       print('Error reading saved messages from secure storage: $e');
+      return null; // Trả về null nếu có lỗi
+    }
+  }
+
+  Future<void> saveStreamToken(String token) async {
+    try {
+      // Ghi giá trị token vào storage với key đã định nghĩa
+      await _storage.write(key: _streamToken, value: token);
+      print('Stream token saved successfully!'); // Log để kiểm tra
+    } catch (e) {
+      // Bắt lỗi nếu có vấn đề khi ghi (hiếm gặp nhưng nên có)
+      print('Error saving token to secure storage: $e');
+      // Bạn có thể ném (throw) một lỗi tùy chỉnh ở đây nếu cần xử lý ở lớp gọi
+      // throw Exception('Failed to save token');
+    }
+  }
+
+  Future<String?> getStreamToken() async {
+    try {
+      // Đọc giá trị từ storage bằng key đã định nghĩa
+      final token = await _storage.read(key: _streamToken);
+      return token; // Trả về token nếu tìm thấy, hoặc null nếu không có
+    } catch (e) {
+      // Bắt lỗi nếu có vấn đề khi đọc
+      print('Error reading token from secure storage: $e');
       return null; // Trả về null nếu có lỗi
     }
   }

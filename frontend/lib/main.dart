@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/design_system/theme/theme.dart';
 import 'package:frontend/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:frontend/features/auth/data/repositories/auth_repository_impl.dart';
@@ -24,6 +25,7 @@ import 'package:frontend/features/recentCallScreen/data/dataSources/recentCall_r
 import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
 import 'package:frontend/features/recentCallScreen/domain/usecase/fetch_recentCall_use_case.dart';
 import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_bloc.dart';
+import 'package:stream_video/stream_video.dart';
 import 'core/navigation/routers.dart';
 import 'core/services/socket.dart';
 import 'features/chat/data/datasources/message_remote_data_source.dart';
@@ -35,6 +37,19 @@ import 'features/contact/presentation/bloc/contact_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final storage = FlutterSecureStorage();
+  final userId = await storage.read(key: 'userId');
+  final streamToken = await storage.read(key: 'streamToken');
+
+  // Only initialize if user info is available
+  if (userId != null && streamToken != null) {
+    StreamVideo(
+      'k5dmbjjwggje',
+      user: User.regular(userId: userId, role: 'user', name: 'User $userId'),
+      userToken: streamToken,
+    );
+  }
   final socketService = SocketService();
   await socketService.initSocket();
 
@@ -82,9 +97,6 @@ class ChatApp extends StatelessWidget {
     required this.recentcallRepository
   });
   @override
-  // Widget build(BuildContext context) {
-  //   return MaterialApp(home: ChatScreen());
-  // }
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [

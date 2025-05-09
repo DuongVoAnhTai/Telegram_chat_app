@@ -37,6 +37,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final _storage = FlutterSecureStorage();
   String userId = '';
   List<File> _selectedImages = []; // Store multiple picked images for preview
@@ -65,14 +66,60 @@ class _ChatPageState extends State<ChatPage> {
   void dispose() {
     _messageController.dispose();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
+
+  // void _initCallClient() async {
+  //   final userToken = await _storage.read(key: 'token');
+  //   final userId = await _storage.read(key: 'userId');
+
+  //   if (userToken == null || userId == null) {
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(SnackBar(content: Text('Missing user information')));
+  //     return;
+  //   }
+
+  //   // Get Stream Video token from backend
+  //   final response = await http.post(
+  //     Uri.parse('http://10.0.2.2:3000/auth/stream-token'),
+  //     headers: {
+  //       'Authorization': 'Bearer $userToken',
+  //       'Content-Type': 'application/json',
+  //     },
+  //   );
+
+  //   if (response.statusCode != 200) {
+  //     throw Exception('Failed to get Stream Video token');
+  //   }
+
+  //   final streamToken = jsonDecode(response.body)['token'];
+
+  //   // Initialize Stream Video client
+  //   StreamVideo.reset();
+  //   client = StreamVideo(
+  //     'k5dmbjjwggje',
+  //     user: User.regular(userId: userId, role: 'user', name: 'User $userId'),
+  //     userToken: streamToken,
+  //   );
+  // }
 
   void _filterMessages() {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _isSearching = query.isNotEmpty;
     });
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   void _sendMessage() async {
@@ -111,44 +158,27 @@ class _ChatPageState extends State<ChatPage> {
       BlocProvider.of<ChatBloc>(context).add(
         SendMessagesEvent(widget.conversationId, content, imageUrls: imageUrls),
       );
+      // Scroll to bottom after sending message
+      _scrollToBottom();
     }
     _messageController.clear();
   }
 
+  void _sendVideoCallMessage(String status) {
+    BlocProvider.of<ChatBloc>(context).add(
+      SendMessagesEvent(
+        widget.conversationId,
+        "Video call $status",
+        imageUrls: [],
+      ),
+    );
+  }
+
   void _startVideoCall() async {
     try {
-      final userToken = await _storage.read(key: 'token');
-      final userId = await _storage.read(key: 'userId');
+      _sendVideoCallMessage("started");
 
-      if (userToken == null || userId == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Missing user information')));
-        return;
-      }
-
-      // Get Stream Video token from backend
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/auth/stream-token'),
-        headers: {
-          'Authorization': 'Bearer $userToken',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to get Stream Video token');
-      }
-
-      final streamToken = jsonDecode(response.body)['token'];
-
-      // Initialize Stream Video client
-      final client = StreamVideo(
-        'k5dmbjjwggje',
-        user: User.regular(userId: userId, role: 'user', name: 'User $userId'),
-        userToken: streamToken,
-      );
-
+      final client = StreamVideo.instance;
       // Connect the client
       await client.connect();
 
@@ -166,7 +196,13 @@ class _ChatPageState extends State<ChatPage> {
       // Navigate to call screen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => CallScreen(call: call)),
+        MaterialPageRoute(
+          builder:
+              (context) => CallScreen(
+                call: call,
+                onCallEnded: () => _sendVideoCallMessage("ended"),
+              ),
+        ),
       );
     } catch (e) {
       debugPrint('Error joining or creating call: $e');
@@ -199,11 +235,12 @@ class _ChatPageState extends State<ChatPage> {
             CircleAvatar(
               backgroundColor: AppColors.primaryColor,
               backgroundImage:
-                  widget.profilePic != null
+                  widget.profilePic != null &&
+                    widget.profilePic!.isNotEmpty
                       ? NetworkImage(widget.profilePic!)
                       : null,
               child:
-                  widget.profilePic == null
+                  widget.profilePic == null || widget.profilePic!.isEmpty
                       ? Text(
                         widget.mate[0].toUpperCase(),
                         style: const TextStyle(color: AppColors.white),
@@ -396,7 +433,13 @@ class _ChatPageState extends State<ChatPage> {
                     );
                   }
 
+                  // Schedule scroll to bottom after the list is built
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _scrollToBottom();
+                  });
+
                   return ListView.builder(
+                    controller: _scrollController,
                     padding: EdgeInsets.all(20),
                     itemCount: _filteredMessages.length,
                     itemBuilder: (context, index) {
