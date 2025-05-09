@@ -28,8 +28,13 @@ class ConversationRemoteDataSource {
             .map((p) => p['fullName'].toString())
             .join(", ");
       }
-      List<ConversationModel> conversations =
+
+      // Convert to Future<List<ConversationModel>>
+      List<Future<ConversationModel>> futures =
           data.map((json) => ConversationModel.fromJson(json, names)).toList();
+
+      // Wait for all futures to complete
+      List<ConversationModel> conversations = await Future.wait(futures);
 
       // Tìm conversation có savedMessagesId và lưu xuống store
       for (var convo in conversations) {
