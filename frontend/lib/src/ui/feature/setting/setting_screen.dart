@@ -39,8 +39,12 @@ class SettingsScreen extends StatelessWidget {
           _SettingsTile(
             icon: Icons.call,
             title: 'Recent calls',
-            onTap: () {
-              // Navigate to recent calls
+            onTap: () async {
+              final _storage = TokenStorageService();
+              final userId = _storage.getUserId();
+              context.push(
+                "/recent-call"
+              );
             },
           ),
           _SettingsTile(

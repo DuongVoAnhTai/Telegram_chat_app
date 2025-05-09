@@ -20,6 +20,10 @@ import 'package:frontend/features/conversation/domain/usecase/check_create_use_c
 import 'package:frontend/features/conversation/domain/usecase/create_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
+import 'package:frontend/features/recentCallScreen/data/dataSources/recentCall_remote_data_source.dart';
+import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
+import 'package:frontend/features/recentCallScreen/domain/usecase/fetch_recentCall_use_case.dart';
+import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_bloc.dart';
 import 'core/navigation/routers.dart';
 import 'core/services/socket.dart';
 import 'features/chat/data/datasources/message_remote_data_source.dart';
@@ -49,12 +53,16 @@ Future<void> main() async {
   final contactRepository = ContactRepositoryImpl(
     datasource: ContactRemoteDataSource(),
   );
+  final recentCallRepository = RecentcallRepositoryImpl(
+    dataSource: RecentCallRemoteDataSource(),
+  );
   runApp(
     ChatApp(
       authRepository: authRepository,
       conversationRepository: conversationRepository,
       messageRepository: messageRepository,
-      contactRepository: contactRepository,
+      contactRepository: contactRepository, 
+      recentcallRepository: recentCallRepository,
     ),
   );
 }
@@ -64,13 +72,14 @@ class ChatApp extends StatelessWidget {
   final ConversationRepositoryImpl conversationRepository;
   final MessageRepositoryImpl messageRepository;
   final ContactRepositoryImpl contactRepository;
-
+  final RecentcallRepositoryImpl recentcallRepository;
   const ChatApp({
     super.key,
     required this.authRepository,
     required this.conversationRepository,
     required this.messageRepository,
     required this.contactRepository,
+    required this.recentcallRepository
   });
   @override
   // Widget build(BuildContext context) {
@@ -117,6 +126,10 @@ class ChatApp extends StatelessWidget {
                 checkCreateUseCase: CheckCreateUseCase(conversationRepository),
                 deleteContactUseCase: DeleteContactUseCase(contactRepository),
               ),
+        ),
+        BlocProvider(
+          create: (_) => RecentCallBloc(recentcallRepository,
+           fetchRecentcallUseCase: FetchRecentcallUseCase(recentcallRepository)),
         ),
       ],
       child: MaterialApp.router(

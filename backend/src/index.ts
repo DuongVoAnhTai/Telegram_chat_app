@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes";
 import messageRoutes from './routes/messageRoute';
 import conversationRoutes from "./routes/converstaionRoute";
 import contactRoutes from "./routes/contactRoute";
+import callRouter from "./routes/callRouters";
 
 // Đọc file .env
 dotenv.config();
@@ -16,7 +17,7 @@ app.use('/auth', authRoutes);
 app.use('/message', messageRoutes);
 app.use('/conversation', conversationRoutes);
 app.use('/contact', contactRoutes);
-
+app.use('/callLog', callRouter);
 
 // Khởi động server
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/telegram_chat_app";

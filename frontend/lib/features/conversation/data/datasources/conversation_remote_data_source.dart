@@ -38,7 +38,6 @@ class ConversationRemoteDataSource {
 
       // Tìm conversation có savedMessagesId và lưu xuống store
       for (var convo in conversations) {
-        print(convo.savedMessagesId ?? "DEO CO CAI CON ME GI HETTTTTTT");
         if (convo.savedMessagesId.isNotEmpty) {
           await _storage.saveSavedMessages(convo.savedMessagesId);
           break; // Nếu chỉ cần lưu một cái đầu tiên
