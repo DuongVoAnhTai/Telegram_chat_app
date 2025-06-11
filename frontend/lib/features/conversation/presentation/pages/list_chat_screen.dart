@@ -214,14 +214,30 @@ class _ListChatScreenState extends State<ListChatScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryColor,
-        child: const Icon(Icons.contacts_outlined),
-        onPressed: () {
-          // Navigate to new chat screen
-          context.push("/contact-page");
-        },
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'createGroup', // quan trọng nếu có nhiều FAB
+            backgroundColor: Colors.green, // đổi màu nếu muốn
+            child: const Icon(Icons.group_add),
+            onPressed: () {
+              context.push("/create-group-page"); // hoặc đường dẫn bạn muốn
+            },
+          ),
+          const SizedBox(height: 12), // khoảng cách giữa 2 nút
+          FloatingActionButton(
+            heroTag: 'contactsButton',
+            backgroundColor: AppColors.primaryColor,
+            child: const Icon(Icons.contacts_outlined),
+            onPressed: () {
+              context.push("/contact-page");
+            },
+          ),
+        ],
       ),
+
     );
   }
 
