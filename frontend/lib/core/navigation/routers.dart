@@ -56,7 +56,6 @@ final GoRouter router = GoRouter(
       final converId = state.uri.queryParameters['conversationId'] ?? 'defaultGroupId';
       return AddMemberPage(
         conversationId: converId,
-        existingMemberIds: [],
       );
     }),
     GoRoute(path: '/group-setting', builder: (context, state) {

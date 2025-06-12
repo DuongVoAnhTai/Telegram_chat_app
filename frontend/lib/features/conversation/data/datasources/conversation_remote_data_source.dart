@@ -109,9 +109,8 @@ class ConversationRemoteDataSource {
 
   Future<void> addMemberToGroupChat(
     String conversationId,
-    String newMemberId,
+    List<String> userIds,
   ) async {
-    print('Adding member to group chat: $conversationId, $newMemberId');
     final token = await _storage.getToken();
     final response = await http.post(
       Uri.parse('$baseUrl/addMember/$conversationId'),
@@ -120,7 +119,7 @@ class ConversationRemoteDataSource {
         "Authorization": "Bearer $token",
         // Thêm token nếu cần: 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({"newMemberId": newMemberId}),
+      body: jsonEncode({"userIds": userIds}),
     );
 
     if (response.statusCode != 200) {

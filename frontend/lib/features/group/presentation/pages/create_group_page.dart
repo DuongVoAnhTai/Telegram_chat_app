@@ -50,7 +50,10 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.backgroundColor,
-          title: const Text('Enter Group Name', style: TextStyle(color: AppColors.textPrimary)),
+          title: const Text(
+            'Enter Group Name',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
           content: TextField(
             onChanged: (value) {
               groupName = value;
@@ -62,7 +65,10 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textPrimary)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textPrimary),
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -72,10 +78,13 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                   );
                   return;
                 }
-                
+
                 Navigator.of(context).pop(groupName);
               },
-              child: const Text('OK', style: TextStyle(color: AppColors.textPrimary)),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: AppColors.textPrimary),
+              ),
             ),
           ],
         );
@@ -90,13 +99,13 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         return;
       }
       String thisUserId = await _storage.getUserId() ?? '';
-       participantIds = selectedUsers.map((contact) => contact.userId).toList();
-       participantIds.add(thisUserId);         
+      participantIds = selectedUsers.map((contact) => contact.userId).toList();
+      participantIds.add(thisUserId);
       try {
         // await _apiService.createGroup(groupName, selectedIds, widget.currentUserId);
-        BlocProvider.of<ConversationBloc>(context).add(
-          CreateGroupChat(participantIds, groupName),
-        );
+        BlocProvider.of<ConversationBloc>(
+          context,
+        ).add(CreateGroupChat(participantIds, groupName));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Group "$groupName" created successfully')),
         );
@@ -200,7 +209,28 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                           },
                         ),
                         title: Row(
-                          children: [const SizedBox(width: 8), Text(user.name)],
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: AppColors.primaryColor,
+                              backgroundImage:
+                                  user.profilePic != null &&
+                                          user.profilePic!.isNotEmpty
+                                      ? NetworkImage(user.profilePic!)
+                                      : null,
+                              child:
+                                  user.profilePic == null ||
+                                          user.profilePic!.isEmpty
+                                      ? Text(
+                                        user.name[0].toUpperCase(),
+                                        style: const TextStyle(
+                                          color: AppColors.white,
+                                        ),
+                                      )
+                                      : null,
+                            ),
+                            SizedBox(width: 10,),
+                            Text(user.name),
+                          ],
                         ),
                         onTap: () {
                           setState(() {

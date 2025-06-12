@@ -6,26 +6,24 @@ import 'package:frontend/features/contact/domain/entities/contact_entity.dart';
 import 'package:frontend/features/contact/presentation/bloc/contact_bloc.dart';
 import 'package:frontend/features/contact/presentation/bloc/contact_event.dart';
 import 'package:frontend/features/contact/presentation/bloc/contact_state.dart';
+import 'package:frontend/features/conversation/data/models/conversation_model.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
 
 class AddMemberPage extends StatefulWidget {
   final String conversationId;
-  final List<String> existingMemberIds;
 
-  AddMemberPage({
-    required this.conversationId,
-    required this.existingMemberIds,
-  });
+  AddMemberPage({required this.conversationId});
 
   @override
   _AddMemberPageState createState() => _AddMemberPageState();
 }
 
 class _AddMemberPageState extends State<AddMemberPage> {
-  ContactEntity? selectedUser;
+  List<ContactEntity> selectedUsers = [];
   List<ContactEntity> filteredUsers = [];
+  List<Participant> currentParticipants = [];
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   @override
@@ -34,6 +32,9 @@ class _AddMemberPageState extends State<AddMemberPage> {
     filteredUsers = [];
     _searchController.addListener(_filterUsers);
     BlocProvider.of<ContactBloc>(context).add(FetchContacts());
+    BlocProvider.of<ConversationBloc>(
+      context,
+    ).add(GetParticipants(widget.conversationId));
   }
 
   @override
@@ -50,26 +51,29 @@ class _AddMemberPageState extends State<AddMemberPage> {
   }
 
   Future<void> _addMembers() async {
-    if (selectedUser == null) {
+    if (selectedUsers.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least one contact')),
       );
       return;
     }
-    final participantId = selectedUser!.userId;
-    BlocProvider.of<ConversationBloc>(context).add(
-      AddMemberToGroupChat(widget.conversationId, participantId),
-    );
+    List<String> userIds = [];
+    for(var u in selectedUsers) {
+      userIds.add(u.userId);
+    }
+    BlocProvider.of<ConversationBloc>(
+      context,
+    ).add(AddMemberToGroupChat(widget.conversationId, userIds));
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<ConversationBloc, ConversationState>(
       listener: (context, state) {
-        if (state is ConversationLoading) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Adding members...')),
-          );
+        if (state is ParticipantsLoaded) {
+          setState(() {
+            currentParticipants = state.participants;
+          });
         } else if (state is MembersAdded) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Members added successfully')),
@@ -115,63 +119,104 @@ class _AddMemberPageState extends State<AddMemberPage> {
                   if (state is ContactLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is ContactLoaded) {
+                    // Tạo Set chứa id của những người đã tham gia group
+                    final participantIds =
+                        currentParticipants.map((e) => e.id).toSet();
+                    // Lọc ra những contact chưa nằm trong currentParticipants
+                    final availableContacts =
+                        state.contacts
+                            .where(
+                              (contact) =>
+                                  !participantIds.contains(contact.userId),
+                            )
+                            .toList();
                     filteredUsers =
-                      _isSearching
-                          ? state.contacts
-                              .where(
-                                (contact) =>
-                                    contact.name.toLowerCase().contains(
-                                      _searchController.text.toLowerCase(),
-                                    ),
-                              )
-                              .toList()
-                          : state.contacts;
-                    if (filteredUsers.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _isSearching
-                                ? "No contact found"
-                                : "No contact yet",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[600],
+                        _isSearching
+                            ? availableContacts
+                                .where(
+                                  (contact) =>
+                                      contact.name.toLowerCase().contains(
+                                        _searchController.text.toLowerCase(),
+                                      ),
+                                )
+                                .toList()
+                            : availableContacts;
+                    if (filteredUsers.isEmpty || availableContacts.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: Colors.grey[400],
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                            const SizedBox(height: 16),
+                            Text(
+                              _isSearching
+                                  ? "No contact found"
+                                  : "No contact yet",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                     return ListView.builder(
                       itemCount: filteredUsers.length,
                       itemBuilder: (context, index) {
                         final user = filteredUsers[index];
+                        final isSelected = selectedUsers.contains(
+                          user,
+                        ); // selectedUsers là List<ContactEntity>
+
                         return ListTile(
-                          leading: Radio<ContactEntity>(
-                            value: user,
-                            groupValue: selectedUser,
-                            onChanged: (ContactEntity? value) {
+                          leading: Checkbox(
+                            value: isSelected,
+                            onChanged: (bool? value) {
                               setState(() {
-                                selectedUser = value;
+                                if (value == true) {
+                                  selectedUsers.add(user);
+                                } else {
+                                  selectedUsers.remove(user);
+                                }
                               });
                             },
                           ),
                           title: Row(
                             children: [
+                              CircleAvatar(
+                                backgroundColor: AppColors.primaryColor,
+                                backgroundImage:
+                                    user.profilePic != null &&
+                                            user.profilePic!.isNotEmpty
+                                        ? NetworkImage(user.profilePic!)
+                                        : null,
+                                child:
+                                    user.profilePic == null ||
+                                            user.profilePic!.isEmpty
+                                        ? Text(
+                                          user.name[0].toUpperCase(),
+                                          style: const TextStyle(
+                                            color: AppColors.white,
+                                          ),
+                                        )
+                                        : null,
+                              ),
+                              SizedBox(width: 10,),
                               Text(user.name),
                             ],
                           ),
                           onTap: () {
                             setState(() {
-                              selectedUser = user;
+                              if (isSelected) {
+                                selectedUsers.remove(user);
+                              } else {
+                                selectedUsers.add(user);
+                              }
                             });
                           },
                         );

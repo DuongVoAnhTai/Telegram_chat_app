@@ -40,7 +40,6 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
   // Show dialog to select and remove members
   void _showRemoveMemberDialog(List<Participant> members) async {
     if (members.isEmpty) {
-      print("empty nè");
       return;
     }
     if (!mounted) return;

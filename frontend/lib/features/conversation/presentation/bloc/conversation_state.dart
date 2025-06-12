@@ -24,9 +24,9 @@ class ConversationError extends ConversationState {
 
 class MembersAdded extends ConversationState {
   final String conversationId;
-  final String newMember;
+  final List<String> userIds;
 
-  MembersAdded(this.conversationId, this.newMember);
+  MembersAdded(this.conversationId, this.userIds);
 }
 
 class ParticipantsLoaded extends ConversationState {

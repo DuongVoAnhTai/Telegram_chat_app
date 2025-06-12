@@ -28,8 +28,8 @@ class ConversationRepositoryImpl implements ConversationRepository {
   }
 
   @override
-  Future<void> addMemberToGroupChat(String conversationId, String newMemberId,) async {
-    return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, newMemberId,);
+  Future<void> addMemberToGroupChat(String conversationId, List<String> userIds) async {
+    return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, userIds);
   }
 
   @override
