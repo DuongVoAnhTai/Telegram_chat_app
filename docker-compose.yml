@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/telegram_chat_app
+    depends_on:
+      - mongo
+    volumes:
+      - ./backend:/app
+  mongo:
+    image: mongo:latest
+    ports:
+      - "37017:27017"
+    volumes:
+      - mongo_data:/data/db
+volumes:
+  mongo_data:
