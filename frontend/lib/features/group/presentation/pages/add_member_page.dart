@@ -79,6 +79,7 @@ class _AddMemberPageState extends State<AddMemberPage> {
             const SnackBar(content: Text('Members added successfully')),
           );
           Navigator.pop(context);
+          context.read<ConversationBloc>().add(GetParticipants(widget.conversationId));
         } else if (state is ConversationError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('${state.message}')),
