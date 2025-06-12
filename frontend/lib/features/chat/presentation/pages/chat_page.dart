@@ -287,7 +287,10 @@ class _ChatPageState extends State<ChatPage> {
                       : null,
             ),
             SizedBox(width: 10),
-            Text(widget.mate),
+            Text(
+                widget.mate.length > 8 ? '${widget.mate.substring(0, 8)}...' : widget.mate,
+                style: TextStyle(fontSize: 26),
+              )
           ],
         ),
         backgroundColor: Colors.transparent,
