@@ -25,6 +25,7 @@ import 'package:frontend/features/conversation/domain/usecase/create_group_chat.
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/get_participants.dart';
 import 'package:frontend/features/conversation/domain/usecase/remove_member.dart';
+import 'package:frontend/features/conversation/domain/usecase/update_group_profile_pic.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
 import 'package:frontend/features/recentCallScreen/data/dataSources/recentCall_remote_data_source.dart';
 import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
@@ -145,6 +146,7 @@ class ChatApp extends StatelessWidget {
                 ),
                 removeMemberUseCase: RemoveMemberUseCase(conversationRepository),
                 changeConverNameUseCase: ChangeConverNameUseCase(conversationRepository),
+                updateGroupProfilePicUseCase: UpdateGroupProfilePicUseCase(conversationRepository)
               ),
         ),
         BlocProvider(

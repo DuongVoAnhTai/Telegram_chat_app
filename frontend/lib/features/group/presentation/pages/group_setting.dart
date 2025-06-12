@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/helpers/constants.dart';
@@ -6,6 +7,8 @@ import 'package:frontend/features/conversation/presentation/bloc/conversation_bl
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:frontend/core/services/cloudinary.dart';
 
 class GroupSettingPage extends StatefulWidget {
   final String conversationId;
@@ -15,6 +18,9 @@ class GroupSettingPage extends StatefulWidget {
 }
 
 class _GroupSettingPageState extends State<GroupSettingPage> {
+  bool _isUploading = false;
+  String? _groupProfilePic;
+
   @override
   void initState() {
     super.initState();
@@ -138,6 +144,42 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
     );
   }
 
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _isUploading = true;
+      });
+      try {
+        final imageFile = File(pickedFile.path);
+        final uploadedUrl = await CloudinaryHelper.uploadImage(imageFile);
+        setState(() {
+          _groupProfilePic = uploadedUrl;
+          _isUploading = false;
+        });
+
+        // Update group profile picture
+        BlocProvider.of<ConversationBloc>(
+          context,
+        ).add(UpdateGroupProfilePic(widget.conversationId, uploadedUrl));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Group profile picture updated successfully')),
+        );
+      } catch (e) {
+        setState(() {
+          _isUploading = false;
+        });
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to upload image: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ConversationBloc, ConversationState>(
@@ -149,6 +191,10 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
         } else if (state is ConversationError) {
           setState(() {
             print('Error: ${state.message}');
+          });
+        } else if (state is UpdatedGroupProfilePic) {
+          setState(() {
+            _groupProfilePic = state.profilePic;
           });
         }
       },
@@ -182,6 +228,24 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
               onTap: () {
                 _showGroupNameDialog();
               },
+            ),
+            _SettingsTile(
+              icon: Icons.account_circle,
+              title: "Change group photo",
+              onTap: _isUploading ? null : _pickAndUploadImage,
+              trailing:
+                  _isUploading
+                      ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primaryColor,
+                          ),
+                        ),
+                      )
+                      : null,
             ),
           ],
         ),
@@ -259,7 +323,7 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Widget? trailing;
 
   const _SettingsTile({

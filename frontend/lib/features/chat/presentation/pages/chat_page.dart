@@ -46,7 +46,7 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> with RouteAware{
+class _ChatPageState extends State<ChatPage> with RouteAware {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -72,23 +72,27 @@ class _ChatPageState extends State<ChatPage> with RouteAware{
     _searchController.addListener(_filterMessages);
     conversationName = widget.mate;
   }
-   void updateConversationName(String newName) {
+
+  void updateConversationName(String newName) {
     setState(() {
       conversationName = newName;
     });
   }
+
   fetchUserUI() async {
     userId = await _storage.read(key: 'userId') ?? '';
     setState(() {
       userId = userId;
     });
   }
-   @override
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
-   @override
+
+  @override
   void didPopNext() {
     print("Fetch lai ");
     // Gọi lại khi từ trang khác pop về đây
@@ -100,6 +104,7 @@ class _ChatPageState extends State<ChatPage> with RouteAware{
     ).add(GetParticipants(widget.conversationId));
     fetchUserUI();
   }
+
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
@@ -310,7 +315,11 @@ class _ChatPageState extends State<ChatPage> with RouteAware{
                 child:
                     widget.profilePic == null || widget.profilePic!.isEmpty
                         ? Text(
-                          conversationName.toUpperCase(),
+                          _isGroup
+                              ? _getGroupAvatarText(conversationName)
+                              : conversationName.isNotEmpty
+                              ? conversationName[0].toUpperCase()
+                              : '?',
                           style: const TextStyle(color: AppColors.white),
                         )
                         : null,
@@ -394,7 +403,7 @@ class _ChatPageState extends State<ChatPage> with RouteAware{
                         final result = await context.push(
                           "/group-setting?conversationId=${widget.conversationId}&participants=$_participants",
                         );
-                        if(result != null && result != "") {
+                        if (result != null && result != "") {
                           updateConversationName(result.toString());
                         }
                       }
@@ -835,5 +844,13 @@ class _ChatPageState extends State<ChatPage> with RouteAware{
         ],
       ),
     );
+  }
+
+  String _getGroupAvatarText(String name) {
+    final words = name.split(' ');
+    if (words.length >= 2) {
+      return '${words[0][0]}${words[1][0]}'.toUpperCase();
+    }
+    return name[0].toUpperCase();
   }
 }

@@ -26,17 +26,24 @@ class ConversationRepositoryImpl implements ConversationRepository {
   Future<void> createGroupChat(List<String> participantIds, String groupName) async {
     return await converstionRemoteDataSource.createGroupChat(participantIds, groupName);
   }
+
   @override
-  Future<void> addMemberToGroupChat(String conversationId, String newMemberId) async {
-    return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, newMemberId);
+  Future<void> addMemberToGroupChat(String conversationId, String newMemberId,) async {
+    return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, newMemberId,);
+  }
+
+  @override
+  Future<void> removeMemberFromGroupChat(String conversationId, String memberId,) async {
+    return await converstionRemoteDataSource.removeMemberFromGroupChat(conversationId, memberId,);
+  }
+
+  @override
+  Future<void> changeConversationName(String conversationId, String newName,) async {
+    return await converstionRemoteDataSource.changeConversationName(conversationId, newName,);
   }
   @override
-  Future<void> removeMemberFromGroupChat(String conversationId, String memberId) async {
-    return await converstionRemoteDataSource.removeMemberFromGroupChat(conversationId, memberId);
-  }
-  @override
-  Future<void> changeConversationName(String conversationId, String newName) async {
-    return await converstionRemoteDataSource.changeConversationName(conversationId, newName);
+  Future<void> updateGroupProfilePic(String conversationId, String profilePic,) async {
+    return await converstionRemoteDataSource.updateGroupProfilePic(conversationId, profilePic,);
   }
   @override
   Future<List<Participant>> getParticipants(String conversationId) async {

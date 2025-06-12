@@ -44,16 +44,19 @@ class _ListChatScreenState extends State<ListChatScreen> with RouteAware {
     _searchController.addListener(_filterConversations);
     BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
-   @override
+
+  @override
   void didPopNext() {
     // Gọi lại khi từ trang khác pop về đây
     BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
   }
+
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
@@ -61,7 +64,6 @@ class _ListChatScreenState extends State<ListChatScreen> with RouteAware {
     super.dispose();
   }
 
-  
   void _filterConversations() {
     final query = _searchController.text.toLowerCase();
     setState(() {
@@ -249,7 +251,6 @@ class _ListChatScreenState extends State<ListChatScreen> with RouteAware {
           ),
         ],
       ),
-
     );
   }
 
@@ -259,6 +260,21 @@ class _ListChatScreenState extends State<ListChatScreen> with RouteAware {
     String time,
     ConversationEntity conversation,
   ) {
+    // Check if this is a group chat by checking if the conversation name is different from participant name
+    // Group chats have a conversation name set, while individual chats use participant names
+    final isGroup =
+        conversation.conversationName != conversation.participantName;
+
+    String getInitials(String text) {
+      if (isGroup) {
+        final words = text.split(' ');
+        if (words.length >= 2) {
+          return '${words[0][0]}${words[1][0]}'.toUpperCase();
+        }
+      }
+      return text.isNotEmpty ? text[0].toUpperCase() : '?';
+    }
+
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       leading: CircleAvatar(
@@ -271,7 +287,7 @@ class _ListChatScreenState extends State<ListChatScreen> with RouteAware {
         child:
             conversation.profilePic == null || conversation.profilePic!.isEmpty
                 ? Text(
-                  name[0][0].toUpperCase(),
+                  getInitials(name),
                   style: const TextStyle(color: AppColors.white),
                 )
                 : null,
