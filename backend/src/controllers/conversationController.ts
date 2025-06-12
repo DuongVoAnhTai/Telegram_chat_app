@@ -189,12 +189,18 @@ export const updateConversationName = async (req: Request, res: Response) => {
 }
 
 // Get conversations of a user
-export const getUserConversations = async (req: Request, res: Response) => {
+export const getUserConversations = async (req: any, res: Response) => {
     try {
-        const { id: userId } = req.params;
-        const conversations = await Conversation.find({ participants: { $in: [userId] } }).populate("participants", "fullName profilePic");
+        const userId = req.user._id;
+      const conversations = await Conversation.find({
+        participants: { $in: [userId] },
+        $or: [
+            { isDeleted: false },
+            { isDeleted: { $exists: false } }
+        ]
+    }).populate("participants", "fullName profilePic");
         res.status(200).json(conversations);
-    } catch (error) {
+    } catch (error) {1
         res.status(500).json({ message: 'Failed to fetch conversations', error });
     }
 }
@@ -291,4 +297,35 @@ export const createNewConversationSavedMessageForNewUser = async (userId: string
         console.error("Error creating saved message conversation:", error);
         throw error;
     }
-} 
+}
+
+export const removeConversation = async (req: any, res: Response) => {
+  try {
+    const { conversationId } = req.params;
+    const ownerId =req.user._id;
+
+    const conversationObjectId = new mongoose.Types.ObjectId(conversationId);
+
+    const conversation = await Conversation.findById(conversationObjectId);
+
+    if (!conversation) {
+       res.status(404).json({ message: 'Conversation not found' });
+       return;
+    }
+
+    if (!conversation.ownerID.equals(ownerId)) {
+       res.status(403).json({ message: 'You are not the owner of this conversation' });
+       return;
+    }
+
+    await Conversation.updateOne(
+      { _id: conversationObjectId },
+      { $set: { isDeleted: true, deletedAt: new Date() } }
+    );
+
+    res.status(200).json({ message: 'Remove conversation successfully' });
+  } catch (error) {
+    console.error('removeConversation error:', error);
+    res.status(500).json({ message: 'Internal server error', error });
+  }
+};
