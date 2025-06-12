@@ -59,9 +59,13 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
   bool _isGroup = false;
   List<Participant> _participants = [];
   late String conversationName;
+  String? _currentProfilePic; // Add this line to track current profile pic
+
   @override
   void initState() {
     super.initState();
+    _currentProfilePic =
+        widget.profilePic; // Initialize with widget's profile pic
     BlocProvider.of<ChatBloc>(
       context,
     ).add(LoadMessageEvent(widget.conversationId));
@@ -296,6 +300,13 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
             _isGroup = false;
             _participants = [];
           });
+        } else if (state is UpdatedGroupProfilePic) {
+          // Update profile picture when it's changed
+          if (state.conversationId == widget.conversationId) {
+            setState(() {
+              _currentProfilePic = state.profilePic;
+            });
+          }
         }
       },
       child: Scaffold(
@@ -309,11 +320,11 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
               CircleAvatar(
                 backgroundColor: AppColors.primaryColor,
                 backgroundImage:
-                    widget.profilePic != null && widget.profilePic!.isNotEmpty
-                        ? NetworkImage(widget.profilePic!)
+                    _currentProfilePic != null && _currentProfilePic!.isNotEmpty
+                        ? NetworkImage(_currentProfilePic!)
                         : null,
                 child:
-                    widget.profilePic == null || widget.profilePic!.isEmpty
+                    _currentProfilePic == null || _currentProfilePic!.isEmpty
                         ? Text(
                           _isGroup
                               ? _getGroupAvatarText(conversationName)
