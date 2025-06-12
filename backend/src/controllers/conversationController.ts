@@ -66,9 +66,9 @@ export const addMemberToConversation = async (req: Request, res: Response) => {
         const { newMemberId } = req.body;
 
         // // Kiểm tra định dạng ObjectId hợp lệ
-        if (!mongoose.Types.ObjectId.isValid(conversationId) || !mongoose.Types.ObjectId.isValid(newMemberId)) {
-             res.status(400).json({ message: 'Invalid conversationId or newMemberId' });
-             return;
+        if (!conversationId || !newMemberId || typeof conversationId !== 'string' || typeof newMemberId !== 'string') {
+            res.status(400).json({ message: 'conversationId and newMemberId must be non-empty strings' });
+            return;
         }
 
         const conversationObjectId = new mongoose.Types.ObjectId(conversationId);
@@ -115,9 +115,9 @@ export const removeMemberFromConversation = async (req: Request, res: Response) 
         const { conversationId } = req.params;
         const { memberIdToRemove } = req.body;
 
-        if (!mongoose.Types.ObjectId.isValid(conversationId) || !mongoose.Types.ObjectId.isValid(memberIdToRemove)) {
-             res.status(400).json({ message: 'Invalid conversationId or memberIdToRemove' });
-             return;
+        if (!conversationId || !memberIdToRemove || typeof conversationId !== 'string' || typeof memberIdToRemove !== 'string') {
+            res.status(400).json({ message: 'conversationId and newMemberId must be non-empty strings' });
+            return;
         }
 
         const conversationObjectId = new mongoose.Types.ObjectId(conversationId);
