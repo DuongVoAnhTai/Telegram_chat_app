@@ -145,7 +145,7 @@ class _AddMemberPageState extends State<AddMemberPage> {
                                 )
                                 .toList()
                             : availableContacts;
-                    if (filteredUsers.isEmpty) {
+                    if (filteredUsers.isEmpty || availableContacts.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +190,30 @@ class _AddMemberPageState extends State<AddMemberPage> {
                               });
                             },
                           ),
-                          title: Text(user.name),
+                          title: Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: AppColors.primaryColor,
+                                backgroundImage:
+                                    user.profilePic != null &&
+                                            user.profilePic!.isNotEmpty
+                                        ? NetworkImage(user.profilePic!)
+                                        : null,
+                                child:
+                                    user.profilePic == null ||
+                                            user.profilePic!.isEmpty
+                                        ? Text(
+                                          user.name[0].toUpperCase(),
+                                          style: const TextStyle(
+                                            color: AppColors.white,
+                                          ),
+                                        )
+                                        : null,
+                              ),
+                              SizedBox(width: 10,),
+                              Text(user.name),
+                            ],
+                          ),
                           onTap: () {
                             setState(() {
                               if (isSelected) {
