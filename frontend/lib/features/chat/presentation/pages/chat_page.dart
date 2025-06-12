@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/core/navigation/routers.dart';
 import 'package:frontend/core/services/token.dart';
 import 'package:frontend/features/conversation/data/datasources/conversation_remote_data_source.dart';
 import 'package:frontend/features/conversation/data/models/conversation_model.dart';
@@ -45,7 +46,7 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> with RouteAware{
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -57,6 +58,7 @@ class _ChatPageState extends State<ChatPage> {
   List<dynamic> _filteredMessages = [];
   bool _isGroup = false;
   List<Participant> _participants = [];
+  late String conversationName;
   @override
   void initState() {
     super.initState();
@@ -68,17 +70,39 @@ class _ChatPageState extends State<ChatPage> {
     ).add(GetParticipants(widget.conversationId));
     fetchUserUI();
     _searchController.addListener(_filterMessages);
+    conversationName = widget.mate;
   }
-
+   void updateConversationName(String newName) {
+    setState(() {
+      conversationName = newName;
+    });
+  }
   fetchUserUI() async {
     userId = await _storage.read(key: 'userId') ?? '';
     setState(() {
       userId = userId;
     });
   }
-
+   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+   @override
+  void didPopNext() {
+    print("Fetch lai ");
+    // Gọi lại khi từ trang khác pop về đây
+    BlocProvider.of<ChatBloc>(
+      context,
+    ).add(LoadMessageEvent(widget.conversationId));
+    BlocProvider.of<ConversationBloc>(
+      context,
+    ).add(GetParticipants(widget.conversationId));
+    fetchUserUI();
+  }
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _messageController.dispose();
     _searchController.dispose();
     _scrollController.dispose();
@@ -286,16 +310,16 @@ class _ChatPageState extends State<ChatPage> {
                 child:
                     widget.profilePic == null || widget.profilePic!.isEmpty
                         ? Text(
-                          widget.mate[0].toUpperCase(),
+                          conversationName.toUpperCase(),
                           style: const TextStyle(color: AppColors.white),
                         )
                         : null,
               ),
               SizedBox(width: 10),
               Text(
-                widget.mate.length > 8
-                    ? '${widget.mate.substring(0, 8)}...'
-                    : widget.mate,
+                conversationName.length > 8
+                    ? '${conversationName.substring(0, 8)}...'
+                    : conversationName,
                 style: TextStyle(fontSize: 26),
               ),
             ],
@@ -326,7 +350,7 @@ class _ChatPageState extends State<ChatPage> {
                   (context) => PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert, color: Colors.grey),
                     position: PopupMenuPosition.under,
-                    onSelected: (value) {
+                    onSelected: (value) async {
                       if (value == 'delete') {
                         showDialog(
                           context: context,
@@ -367,9 +391,12 @@ class _ChatPageState extends State<ChatPage> {
                           },
                         );
                       } else if (value == 'group_settings' && _isGroup) {
-                        context.push(
+                        final result = await context.push(
                           "/group-setting?conversationId=${widget.conversationId}&participants=$_participants",
                         );
+                        if(result != null && result != "") {
+                          updateConversationName(result.toString());
+                        }
                       }
                     },
                     itemBuilder:

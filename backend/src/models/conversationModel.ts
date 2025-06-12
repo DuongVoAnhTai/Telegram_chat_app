@@ -1,11 +1,14 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IConversation extends Document {
+    ownerID: mongoose.Types.ObjectId;
     name: string;
     participants: mongoose.Types.ObjectId[];
     lastMessage: string;
     updatedAt: Date;
     savedMessagesId: mongoose.Types.ObjectId;
+    isDeleted: Boolean;
+    deletedAt: Date;
 }
 
 const ConversationSchema: Schema = new Schema(
@@ -31,6 +34,14 @@ const ConversationSchema: Schema = new Schema(
         ownerID: {
             type: mongoose.Types.ObjectId,
             ref: 'User',
+            require: false,
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
+        deletedAt: {
+            type: Date,
             require: false,
         }
     },

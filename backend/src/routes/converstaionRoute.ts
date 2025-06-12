@@ -1,20 +1,22 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
-import { getUserConversations, createConversation, getParticipantConversations, checkOrCreateConversation, addMemberToConversation, removeMemberFromConversation, updateConversationName } from "../controllers/conversationController";
+import { getUserConversations, createConversation, getParticipantConversations, checkOrCreateConversation, removeMemberFromConversation, updateConversationName, removeConversation, addMembersToConversation } from "../controllers/conversationController";
 
 
 const router = express.Router();
 
-router.get('/fetchConversation/:id', authenticateToken, getUserConversations);
+router.get('/fetchConversation', authenticateToken, getUserConversations);
 
 router.post('/create', authenticateToken, createConversation);
 
 router.post('/checkOrCreate', authenticateToken, checkOrCreateConversation);
 
-router.post('/addMember/:conversationId',authenticateToken, addMemberToConversation);
+router.post('/addMember/:conversationId',authenticateToken, addMembersToConversation);
 
-router.delete('/:conversationId/removeUser', removeMemberFromConversation);
+router.delete('/:conversationId/removeUser',authenticateToken, removeMemberFromConversation);
+
+router.delete('/:conversationId/removeConversation',authenticateToken, removeConversation);
 
 router.put("/:conversationId", updateConversationName);
 
