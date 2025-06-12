@@ -36,7 +36,6 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
     BlocProvider.of<ConversationBloc>(
       context,
     ).add(RemoveMembers(conversationId, idMember));
-    BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
   }
 
   // Show dialog to select and remove members
@@ -109,7 +108,7 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(context, 'cancel'),
                   child: Text(
                     'Cancel',
                     style: TextStyle(color: AppColors.textPrimary),
@@ -125,12 +124,10 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
                               selectedMember ?? "",
                             );
                             if (!mounted) return;
-                            Navigator.pop(context); // Close dialog
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('$selectedMember removed'),
-                              ),
-                            );
+                            Navigator.pop(context, 'removed'); // Close dialog
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text('removed')));
                           },
                   child: Text(
                     'Remove',
@@ -142,7 +139,14 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
           },
         );
       },
-    );
+    ).then((result) async {
+      if (result == 'removed' || result == 'cancel') {
+        await Future.delayed(Duration(milliseconds: 300));
+        context.read<ConversationBloc>().add(
+          GetParticipants(widget.conversationId),
+        );
+      }
+    });
   }
 
   Future<void> _pickAndUploadImage() async {

@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
+import "package:frontend/core/helpers/constants.dart";
 import "package:frontend/features/contact/presentation/bloc/contact_event.dart";
 import "package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart";
 import "package:frontend/features/conversation/presentation/bloc/conversation_event.dart";
@@ -27,7 +28,11 @@ class _ContactPageState extends State<ContactPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Contact Page")),
+      backgroundColor: AppColors.backgroundColor, 
+      appBar: AppBar(
+        backgroundColor: AppColors.backgroundColor, 
+        title: const Text("Contact Page")
+      ),
       body: BlocListener<ContactBloc, ContactState>(
         listener: (context, state) {
           if (state is ConversationReady) {
@@ -71,8 +76,35 @@ class _ContactPageState extends State<ContactPage> {
                 itemCount: state.contacts.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(state.contacts[index].name),
-                    subtitle: Text(state.contacts[index].email),
+                    title: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: AppColors.primaryColor,
+                          backgroundImage:
+                              state.contacts[index].profilePic != null &&
+                                      state
+                                          .contacts[index]
+                                          .profilePic!
+                                          .isNotEmpty
+                                  ? NetworkImage(
+                                    state.contacts[index].profilePic!,
+                                  )
+                                  : null,
+                          child:
+                              state.contacts[index].profilePic == null ||
+                                      state.contacts[index].profilePic!.isEmpty
+                                  ? Text(
+                                    state.contacts[index].name[0].toUpperCase(),
+                                    style: const TextStyle(
+                                      color: AppColors.white,
+                                    ),
+                                  )
+                                  : null,
+                        ),
+                        SizedBox(width: 10),
+                        Text(state.contacts[index].name),
+                      ],
+                    ),
                     onTap: () {
                       BlocProvider.of<ContactBloc>(context).add(
                         CheckCreateConverstaion(
@@ -86,6 +118,7 @@ class _ContactPageState extends State<ContactPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
+                            backgroundColor: AppColors.backgroundColor, 
                             title: Text('Delete Contact'),
                             content: Text(
                               'Are you sure you want to delete this contact? This will also delete all conversations and messages with this contact.',
@@ -130,6 +163,7 @@ class _ContactPageState extends State<ContactPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.backgroundColor, 
         onPressed: () => _showAddContactDialog(context),
         child: Icon(Icons.add),
       ),
@@ -151,6 +185,7 @@ class _ContactPageState extends State<ContactPage> {
               }
 
               return AlertDialog(
+                backgroundColor: AppColors.backgroundColor, 
                 title: const Text('Add contact'),
                 content: Form(
                   key: formKey,
@@ -186,7 +221,7 @@ class _ContactPageState extends State<ContactPage> {
                     onPressed: () {
                       context.pop();
                     },
-                    child: const Text('Cancel'),
+                    child: const Text('Cancel', style: TextStyle(color: AppColors.textPrimary),),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -198,7 +233,7 @@ class _ContactPageState extends State<ContactPage> {
                         context.pop();
                       }
                     },
-                    child: const Text('Add'),
+                    child: const Text('Add', style: TextStyle(color: AppColors.textPrimary)),
                   ),
                 ],
               );

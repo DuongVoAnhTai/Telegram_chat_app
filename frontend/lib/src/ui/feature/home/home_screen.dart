@@ -34,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen>{
       child: _screens[_selectedIndex]
     ),
     bottomNavigationBar: BottomNavigationBar(
+      backgroundColor: AppColors.backgroundColor, 
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
