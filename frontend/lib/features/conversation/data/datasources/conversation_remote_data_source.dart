@@ -5,7 +5,7 @@ import 'package:frontend/features/conversation/data/models/conversation_model.da
 import 'package:http/http.dart' as http;
 
 class ConversationRemoteDataSource {
-  final String baseUrl = 'http://10.0.2.2:3000/conversation';
+  final String baseUrl = 'http://192.168.137.1:3000/conversation';
   final _storage = TokenStorageService();
 
   Future<List<ConversationModel>> fetchConversations() async {

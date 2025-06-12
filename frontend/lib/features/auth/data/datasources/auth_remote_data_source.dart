@@ -5,7 +5,7 @@ import '../models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRemoteDataSource {
-  final String baseUrl = "http://10.0.2.2:3000/auth";
+  final String baseUrl = "http://192.168.137.1:3000/auth";
   final _storage = FlutterSecureStorage();
 
   Future<UserModel> login({
@@ -24,7 +24,7 @@ class AuthRemoteDataSource {
     }
 
     final responseStreamToken = await http.post(
-      Uri.parse('http://10.0.2.2:3000/auth/stream-token'),
+      Uri.parse('http://192.168.137.1:3000/auth/stream-token'),
       headers: {
         'Authorization': 'Bearer ${jsonDecode(response.body)['token']}',
         'Content-Type': 'application/json',
