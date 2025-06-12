@@ -12,7 +12,7 @@ class ConversationRemoteDataSource {
     final token = await _storage.getToken();
     final userId = await _storage.getUserId();
     final response = await http.get(
-      Uri.parse('$baseUrl/fetchConversation/$userId'),
+      Uri.parse('$baseUrl/fetchConversation'),
       headers: {"Authorization": "Bearer $token"},
     );
 
