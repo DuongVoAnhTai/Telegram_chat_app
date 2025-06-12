@@ -53,7 +53,7 @@ class ConversationRemoteDataSource {
   Future<void> createConversations(String participantId) async {
     final token = await _storage.getToken();
     final response = await http.post(
-      Uri.parse('$baseUrl/createConversation'),
+      Uri.parse('$baseUrl/create'),
       body: jsonEncode({"participants": participantId}),
       headers: {
         "Content-Type": "application/json",
@@ -82,6 +82,88 @@ class ConversationRemoteDataSource {
       return data['_id'];
     } else {
       throw Exception('Failed to create conversations');
+    }
+  }
+
+  Future<void> createGroupChat(
+    List<String> participantIds,
+    String groupName,
+  ) async {
+    final token = await _storage.getToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/create'),
+      body: jsonEncode({
+        "participants": participantIds,
+        "groupName": groupName,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to create conversations');
+    }
+  }
+
+  Future<void> addMemberToGroupChat(
+    String conversationId,
+    String newMemberId,
+  ) async {
+    print('Adding member to group chat: $conversationId, $newMemberId');
+    final response = await http.post(
+      Uri.parse('$baseUrl/addMember/$conversationId'),
+      headers: {
+        'Content-Type': 'application/json',
+        // Thêm token nếu cần: 'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({"newMemberId": newMemberId}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add member to group chat');
+    }
+  }
+  Future<void> removeMemberFromGroupChat(
+    String conversationId,
+    String memberId,
+    ) async {
+    // final response = await http.post(
+    //   Uri.parse('$baseUrl/addMember/$conversationId'),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     // Thêm token nếu cần: 'Authorization': 'Bearer $token',
+    //   },
+    //   body: jsonEncode({"newMemberId": memberId}),
+    // );
+
+    // if (response.statusCode != 200) {
+    //   throw Exception('Failed to add member to group chat');
+    // }
+  }
+  Future<void> changeConversationName (
+    String conversationId,
+    String newName
+  ) async
+  {
+    
+  }
+  Future<List<Participant>> getParticipants(String conversationId) async {
+    final response = await http.get(
+      
+      Uri.parse('$baseUrl/getParticipants/$conversationId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final List participantsJson = data['participants'];
+      return participantsJson
+          .map((json) => Participant.fromJson(json))
+          .toList();
+    } else {
+      throw Exception('Failed to fetch participants: ${response.body}');
     }
   }
 }

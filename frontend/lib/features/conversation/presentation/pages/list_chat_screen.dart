@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/core/navigation/routers.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/features/conversation/domain/entities/conversation_entity.dart';
@@ -32,7 +33,7 @@ class ListChatScreen extends StatefulWidget {
   State<ListChatScreen> createState() => _ListChatScreenState();
 }
 
-class _ListChatScreenState extends State<ListChatScreen> {
+class _ListChatScreenState extends State<ListChatScreen> with RouteAware {
   final TextEditingController _searchController = TextEditingController();
   List<ConversationEntity> _filteredConversations = [];
   bool _isSearching = false;
@@ -43,13 +44,24 @@ class _ListChatScreenState extends State<ListChatScreen> {
     _searchController.addListener(_filterConversations);
     BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
   }
-
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+   @override
+  void didPopNext() {
+    // Gọi lại khi từ trang khác pop về đây
+    BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
+  }
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _searchController.dispose();
     super.dispose();
   }
 
+  
   void _filterConversations() {
     final query = _searchController.text.toLowerCase();
     setState(() {
@@ -177,7 +189,7 @@ class _ListChatScreenState extends State<ListChatScreen> {
                       itemBuilder: (context, index) {
                         final conversation = _filteredConversations[index];
                         return GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             context.push(
                               "/chat-page?id=${conversation.id}&mate=${conversation.conversationName}&profilePic=${conversation.profilePic ?? ''}",
                             );
