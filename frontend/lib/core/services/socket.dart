@@ -8,15 +8,15 @@ class SocketService {
   late IO.Socket _socket;
   final _storage = FlutterSecureStorage();
 
-  SocketService._internal(){
+  SocketService._internal() {
     initSocket();
   }
 
   Future<void> initSocket() async {
     String token = await _storage.read(key: 'token') ?? '';
     _socket = IO.io(
-        'http://192.168.137.1:3000',
-        IO.OptionBuilder()
+      'http://10.0.2.2:3000',
+      IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
           .setExtraHeaders({'Authorization': 'Bearer $token'})

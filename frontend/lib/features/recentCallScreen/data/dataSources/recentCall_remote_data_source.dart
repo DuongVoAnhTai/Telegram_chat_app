@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:frontend/core/services/token.dart';
 
 class RecentCallRemoteDataSource {
-  final String baseUrl = 'http://192.168.137.1:3000/callLog';
+  final String baseUrl = 'http://10.0.2.2:3000/callLog';
   final _storage = TokenStorageService();
 
   Future<List<RecentCallModel>> fetchRecentCalls() async {
@@ -16,15 +16,15 @@ class RecentCallRemoteDataSource {
       Uri.parse("$baseUrl/recentCall/$userId"),
       headers: {
         // "Authorization": "Bearer $token",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
     );
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);
       // Convert to List<Future<RecentCallModel>>
       print(jsonEncode(data));
-      List<Future<RecentCallModel>> futures = 
-      data.map((json) => RecentCallModel.fromJson(json)).toList();
+      List<Future<RecentCallModel>> futures =
+          data.map((json) => RecentCallModel.fromJson(json)).toList();
 
       // Wait for all futures to complete
       List<RecentCallModel> recentcalls = await Future.wait(futures);
@@ -52,7 +52,7 @@ class RecentCallRemoteDataSource {
       Uri.parse("$baseUrl/start"),
       headers: {
         // "Authorization": "Bearer $token",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: body,
     );
@@ -63,9 +63,7 @@ class RecentCallRemoteDataSource {
   }
 
   // Gọi khi kết thúc cuộc gọi
-  Future<void> endRecentCall({
-    required String conversationId,
-  }) async {
+  Future<void> endRecentCall({required String conversationId}) async {
     // final token = await _storage.getToken();
     final userId = await _storage.getUserId();
 
@@ -78,7 +76,7 @@ class RecentCallRemoteDataSource {
       Uri.parse("$baseUrl/end"),
       headers: {
         // "Authorization": "Bearer $token",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: body,
     );
