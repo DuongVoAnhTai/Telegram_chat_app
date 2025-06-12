@@ -1,3 +1,4 @@
+import 'package:frontend/features/conversation/data/models/conversation_model.dart';
 import 'package:frontend/features/conversation/domain/entities/conversation_entity.dart';
 
 abstract class ConversationRepository {
@@ -6,5 +7,5 @@ abstract class ConversationRepository {
   Future<String> checkCreateConversation(String contactId);
   Future<void> createGroupChat(List<String> participantIds, String groupName);
   Future<void> addMemberToGroupChat(String conversationId, String newMemberId);
-  Future<List<String>> getParticipants(String conversationId);  
+  Future<List<Participant>> getParticipants(String conversationId);  
 }

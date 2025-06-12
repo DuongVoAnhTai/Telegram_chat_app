@@ -1,3 +1,5 @@
+import 'package:frontend/features/conversation/data/models/conversation_model.dart';
+
 import '../../domain/entities/conversation_entity.dart';
 
 abstract class ConversationState {}
@@ -26,7 +28,7 @@ class MembersAdded extends ConversationState {
   MembersAdded(this.conversationId, this.newMember);
 }
 class ParticipantsLoaded extends ConversationState {
-  final List<String> participants;
+  final List<Participant> participants;
 
   ParticipantsLoaded(this.participants);
 }

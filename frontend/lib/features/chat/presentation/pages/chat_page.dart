@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:frontend/core/helpers/constants.dart';
 import 'package:frontend/core/services/token.dart';
 import 'package:frontend/features/conversation/data/datasources/conversation_remote_data_source.dart';
+import 'package:frontend/features/conversation/data/models/conversation_model.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:frontend/features/group/presentation/pages/add_member_page.dart';
 import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
@@ -54,7 +55,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isSearching = false;
   List<dynamic> _filteredMessages = [];
   bool _isGroup = false;
-  
+  List<Participant> _participants = [];
   @override
   void initState() {
     super.initState();
@@ -252,7 +253,9 @@ class _ChatPageState extends State<ChatPage> {
         if (state is ParticipantsLoaded) {
           setState(() {
             _isGroup = state.participants.length > 2;
-            print('Participants loaded: ${state.participants.length}, canAddMember: $_isGroup');
+                        print('Participants loaded: ${state.participants.length}, canAddMember: $_isGroup');
+
+            _participants = state.participants;
           });
         } else if (state is ConversationError) {
           setState(() {
@@ -355,7 +358,7 @@ class _ChatPageState extends State<ChatPage> {
                       );
                     } else if (value == 'group_settings' && _isGroup) {
                       context.push(
-                        "/group-setting?conversationId=${widget.conversationId}",
+                        "/group-setting?conversationId=${widget.conversationId}&participants=$_participants",
                       );
                     }
                   },
