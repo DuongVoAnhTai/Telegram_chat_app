@@ -112,10 +112,12 @@ class ConversationRemoteDataSource {
     String newMemberId,
   ) async {
     print('Adding member to group chat: $conversationId, $newMemberId');
+    final token = await _storage.getToken();
     final response = await http.post(
       Uri.parse('$baseUrl/addMember/$conversationId'),
       headers: {
         'Content-Type': 'application/json',
+        "Authorization": "Bearer $token",
         // Thêm token nếu cần: 'Authorization': 'Bearer $token',
       },
       body: jsonEncode({"newMemberId": newMemberId}),
@@ -129,25 +131,32 @@ class ConversationRemoteDataSource {
     String conversationId,
     String memberId,
     ) async {
-    // final response = await http.post(
-    //   Uri.parse('$baseUrl/addMember/$conversationId'),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     // Thêm token nếu cần: 'Authorization': 'Bearer $token',
-    //   },
-    //   body: jsonEncode({"newMemberId": memberId}),
-    // );
-
-    // if (response.statusCode != 200) {
-    //   throw Exception('Failed to add member to group chat');
-    // }
+      final response = await http.delete(
+        Uri.parse('$baseUrl/$conversationId/removeUser'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({"memberIdToRemove": memberId}),
+      );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add member to group chat');
+    }
   }
   Future<void> changeConversationName (
     String conversationId,
     String newName
   ) async
   {
-    
+    final response = await http.put(
+        Uri.parse('$baseUrl/$conversationId'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({"name": newName}),
+      );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add member to group chat');
+    }
   }
   Future<List<Participant>> getParticipants(String conversationId) async {
     final response = await http.get(
