@@ -12,7 +12,7 @@ import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_
 import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_event.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:frontend/features/chat/data/models/message_model.dart';
+import 'package:frontend/features/chat/domain/entities/message_entity.dart';
 
 import 'package:frontend/features/chat/presentation/bloc/chat_state.dart';
 import 'package:flutter/material.dart';
@@ -292,7 +292,12 @@ class _ChatPageState extends State<ChatPage> {
                         : null,
               ),
               SizedBox(width: 10),
-              Text(widget.mate),
+              Text(
+                widget.mate.length > 8
+                    ? '${widget.mate.substring(0, 8)}...'
+                    : widget.mate,
+                style: TextStyle(fontSize: 26),
+              ),
             ],
           ),
           backgroundColor: Colors.transparent,
@@ -541,7 +546,7 @@ class _ChatPageState extends State<ChatPage> {
     BuildContext context,
     String mess,
     List<String>? images,
-    MessageModel message,
+    MessageEntity message,
   ) {
     // Find the sender's info from participants
     final sender = _participants.firstWhere(
