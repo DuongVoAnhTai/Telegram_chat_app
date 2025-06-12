@@ -14,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1; // Default is Chat tab (index 1)
+  int _selectedIndex = 0; // Default is profile tab (index 0)
 
   final List<Widget> _screens = [
     ProfileScreen(),
