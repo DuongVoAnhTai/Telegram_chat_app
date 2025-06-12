@@ -19,11 +19,12 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
   void initState() {
     super.initState();
     BlocProvider.of<ConversationBloc>(context).add(GetParticipants(widget.conversationId));
+
   }
   List<Participant> participants = [];
   // Mock function
-  Future<void> _removeMember(String conversationId, String? idMember) async {
-    print('Removed $idMember from conversation $conversationId');
+  Future<void> _removeMember(String conversationId, String idMember) async {
+    BlocProvider.of<ConversationBloc>(context).add(RemoveMembers(conversationId, idMember));
   }
 
   // Show dialog to select and remove members
@@ -85,7 +86,7 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
                           : () async {
                             await _removeMember(
                               widget.conversationId,
-                              selectedMember,
+                              selectedMember?? "",
                             );
                             if (!mounted) return;
                             Navigator.pop(context); // Close dialog
@@ -194,7 +195,7 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
                   );
                   return;
                 }
-
+                BlocProvider.of<ConversationBloc>(context).add(ChangeConverName(widget.conversationId, groupName));
                 Navigator.of(context).pop(groupName);
               },
               child: const Text(
