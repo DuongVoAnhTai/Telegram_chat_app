@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
-import { getUserConversations, createConversation, getParticipantConversations, checkOrCreateConversation, addMemberToConversation, removeMemberFromConversation, updateConversationName, removeConversation } from "../controllers/conversationController";
+import { getUserConversations, createConversation, getParticipantConversations, checkOrCreateConversation, removeMemberFromConversation, updateConversationName, removeConversation, addMembersToConversation } from "../controllers/conversationController";
 
 
 const router = express.Router();
@@ -12,7 +12,7 @@ router.post('/create', authenticateToken, createConversation);
 
 router.post('/checkOrCreate', authenticateToken, checkOrCreateConversation);
 
-router.post('/addMember/:conversationId',authenticateToken, addMemberToConversation);
+router.post('/addMember/:conversationId',authenticateToken, addMembersToConversation);
 
 router.delete('/:conversationId/removeUser',authenticateToken, removeMemberFromConversation);
 
