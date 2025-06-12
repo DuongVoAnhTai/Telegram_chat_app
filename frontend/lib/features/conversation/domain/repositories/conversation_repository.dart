@@ -6,5 +6,5 @@ abstract class ConversationRepository {
   Future<String> checkCreateConversation(String contactId);
   Future<void> createGroupChat(List<String> participantIds, String groupName);
   Future<void> addMemberToGroupChat(String conversationId, String newMemberId);
-  Future<List<String>> getParticipants(String conversationId);  
+  Future<List<Map<String, dynamic>>> getParticipants(String conversationId);  
 }

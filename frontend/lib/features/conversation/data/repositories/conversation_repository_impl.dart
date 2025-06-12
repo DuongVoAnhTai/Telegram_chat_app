@@ -30,7 +30,7 @@ class ConversationRepositoryImpl implements ConversationRepository {
     return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, newMemberId);
   }
   @override
-  Future<List<String>> getParticipants(String conversationId) async {
+  Future<List<Map<String, dynamic>>> getParticipants(String conversationId) async {
     return await converstionRemoteDataSource.getParticipants(conversationId);
   }
 }

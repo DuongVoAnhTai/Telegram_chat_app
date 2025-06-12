@@ -26,7 +26,7 @@ class MembersAdded extends ConversationState {
   MembersAdded(this.conversationId, this.newMember);
 }
 class ParticipantsLoaded extends ConversationState {
-  final List<String> participants;
+  final  List<Map<String, dynamic>> participants;
 
   ParticipantsLoaded(this.participants);
 }

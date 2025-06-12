@@ -165,10 +165,10 @@ export const getParticipantConversations = async (req: Request, res: Response) =
     }
 
     // Trích xuất _id từ participants
-    const participantIds = conversation.participants.map(participant => participant._id.toString());
+    // const participantIds = conversation.participants.map(participant => participant._id.toString());
     
-    console.log('Participants:', participantIds);
-    res.status(200).json({ participants: participantIds });
+    console.log('Participants:', conversation.participants);
+    res.status(200).json({ participants: conversation.participants });
   } catch (error) {
     console.error('Error fetching participants:', error);
     res.status(500).json({ message: 'Failed to fetch participants', error });

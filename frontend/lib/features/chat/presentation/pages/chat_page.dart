@@ -54,6 +54,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isSearching = false;
   List<dynamic> _filteredMessages = [];
   bool _isGroup = false;
+  List<dynamic> _participants = [];
 
   @override
   void initState() {
@@ -61,7 +62,9 @@ class _ChatPageState extends State<ChatPage> {
     BlocProvider.of<ChatBloc>(
       context,
     ).add(LoadMessageEvent(widget.conversationId));
-    BlocProvider.of<ConversationBloc>(context).add(GetParticipants(widget.conversationId));
+    BlocProvider.of<ConversationBloc>(
+      context,
+    ).add(GetParticipants(widget.conversationId));
     fetchUserUI();
     _searchController.addListener(_filterMessages);
   }
@@ -72,7 +75,7 @@ class _ChatPageState extends State<ChatPage> {
       userId = userId;
     });
   }
-  
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -252,275 +255,277 @@ class _ChatPageState extends State<ChatPage> {
         if (state is ParticipantsLoaded) {
           setState(() {
             _isGroup = state.participants.length > 2;
-            print('Participants loaded: ${state.participants.length}, canAddMember: $_isGroup');
+            _participants = state.participants;
+            print('_participants: $_participants');
           });
         } else if (state is ConversationError) {
           setState(() {
             _isGroup = false;
-            print('Error: ${state.message}');
+            _participants = [];
           });
         }
       },
-    child: Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: AppColors.primaryColor,
-              backgroundImage:
-                  widget.profilePic != null && widget.profilePic!.isNotEmpty
-                      ? NetworkImage(widget.profilePic!)
-                      : null,
-              child:
-                  widget.profilePic == null || widget.profilePic!.isEmpty
-                      ? Text(
-                        widget.mate[0].toUpperCase(),
-                        style: const TextStyle(color: AppColors.white),
-                      )
-                      : null,
-            ),
-            SizedBox(width: 10),
-            Text(widget.mate),
-          ],
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _startVideoCall,
-            icon: Icon(Icons.videocam, color: Colors.grey),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: AppColors.primaryColor,
+                backgroundImage:
+                    widget.profilePic != null && widget.profilePic!.isNotEmpty
+                        ? NetworkImage(widget.profilePic!)
+                        : null,
+                child:
+                    widget.profilePic == null || widget.profilePic!.isEmpty
+                        ? Text(
+                          widget.mate[0].toUpperCase(),
+                          style: const TextStyle(color: AppColors.white),
+                        )
+                        : null,
+              ),
+              SizedBox(width: 10),
+              Text(widget.mate),
+            ],
           ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                }
-              });
-            },
-            icon: Icon(
-              _isSearching ? Icons.close : Icons.search,
-              color: Colors.grey,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            IconButton(
+              onPressed: _startVideoCall,
+              icon: Icon(Icons.videocam, color: Colors.grey),
             ),
-          ),
-          Builder(
-            builder:
-                (context) => PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Colors.grey),
-                  position: PopupMenuPosition.under,
-                  onSelected: (value) {
-                    if (value == 'delete') {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Delete Conversation'),
-                            content: const Text(
-                              'Are you sure you want to delete this conversation? This action cannot be undone.',
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('Cancel'),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) {
+                    _searchController.clear();
+                  }
+                });
+              },
+              icon: Icon(
+                _isSearching ? Icons.close : Icons.search,
+                color: Colors.grey,
+              ),
+            ),
+            Builder(
+              builder:
+                  (context) => PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: Colors.grey),
+                    position: PopupMenuPosition.under,
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Delete Conversation'),
+                              content: const Text(
+                                'Are you sure you want to delete this conversation? This action cannot be undone.',
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  BlocProvider.of<ConversationBloc>(
-                                    context,
-                                  ).add(
-                                    DeleteConversation(widget.conversationId),
-                                  );
-                                  Navigator.of(context).pop(); // Close dialog
-                                  Navigator.of(context).pop(); // Go back
-                                },
-                                child: const Text(
-                                  'Delete',
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.bold,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    BlocProvider.of<ConversationBloc>(
+                                      context,
+                                    ).add(
+                                      DeleteConversation(widget.conversationId),
+                                    );
+                                    Navigator.of(context).pop(); // Close dialog
+                                    Navigator.of(context).pop(); // Go back
+                                  },
+                                  child: const Text(
+                                    'Delete',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    } else if (value == 'add_member' && _isGroup) {
-                      context.push(
-                              "/add-member-page?conversationId=${widget.conversationId}",
+                              ],
                             );
-                    }
-                  },
-                  itemBuilder:
-                      (BuildContext context) => [
-                        const PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text(
-                                'Delete Conversation',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if(_isGroup) 
-                          const PopupMenuItem<String>(
-                          value: 'add_member',
-                          child: Row(
-                            children: [
-                              Icon(Icons.person_add, color: Colors.blue),
-                              SizedBox(width: 8),
-                              Text(
-                                'Add Member',
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search bar
-          if (_isSearching)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search in messages...',
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  suffixIcon:
-                      _searchController.text.isNotEmpty
-                          ? IconButton(
-                            icon: Icon(Icons.clear, color: Colors.grey),
-                            onPressed: () {
-                              _searchController.clear();
-                            },
-                          )
-                          : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
-                ),
-                autofocus: true,
-              ),
-            ),
-          Expanded(
-            child: BlocBuilder<ChatBloc, ChatState>(
-              builder: (context, state) {
-                if (state is ChatLoadingState) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (state is ChatLoadedState) {
-                  // Filter messages if searching
-                  _filteredMessages =
-                      _isSearching
-                          ? state.messages
-                              .where(
-                                (message) =>
-                                    message.text.toLowerCase().contains(
-                                      _searchController.text.toLowerCase(),
-                                    ),
-                              )
-                              .toList()
-                          : state.messages;
-
-                  if (_filteredMessages.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _isSearching
-                                ? Icons.search_off
-                                : Icons.chat_bubble_outline,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            _isSearching
-                                ? "No messages found"
-                                : "No messages yet",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  // Schedule scroll to bottom after the list is built
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToBottom();
-                  });
-
-                  return ListView.builder(
-                    controller: _scrollController,
-                    padding: EdgeInsets.all(20),
-                    itemCount: _filteredMessages.length,
-                    itemBuilder: (context, index) {
-                      final message = _filteredMessages[index];
-                      final isSentMessage = message.senderId == userId;
-                      if (isSentMessage) {
-                        return _buildSentMessage(
-                          context,
-                          message.text,
-                          message.image,
-                          message.id,
+                          },
                         );
-                      } else {
-                        return _buildReceivedMessage(
-                          context,
-                          message.text,
-                          message.image,
+                      } else if (value == 'add_member' && _isGroup) {
+                        context.push(
+                          "/add-member-page?conversationId=${widget.conversationId}",
                         );
                       }
                     },
-                  );
-                } else if (state is ChatErrorState) {
-                  return Center(child: Text(state.error));
-                }
-                return Center(child: Text("No messages found"));
-              },
+                    itemBuilder:
+                        (BuildContext context) => [
+                          const PopupMenuItem<String>(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_outline, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Delete Conversation',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (_isGroup)
+                            const PopupMenuItem<String>(
+                              value: 'add_member',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.person_add, color: Colors.blue),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Add Member',
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                  ),
             ),
-          ),
-          _buildMessageInput(),
-        ],
+          ],
+        ),
+        body: Column(
+          children: [
+            // Search bar
+            if (_isSearching)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search in messages...',
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    suffixIcon:
+                        _searchController.text.isNotEmpty
+                            ? IconButton(
+                              icon: Icon(Icons.clear, color: Colors.grey),
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                            )
+                            : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  autofocus: true,
+                ),
+              ),
+            Expanded(
+              child: BlocBuilder<ChatBloc, ChatState>(
+                builder: (context, state) {
+                  if (state is ChatLoadingState) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (state is ChatLoadedState) {
+                    // Filter messages if searching
+                    _filteredMessages =
+                        _isSearching
+                            ? state.messages
+                                .where(
+                                  (message) =>
+                                      message.text.toLowerCase().contains(
+                                        _searchController.text.toLowerCase(),
+                                      ),
+                                )
+                                .toList()
+                            : state.messages;
+
+                    if (_filteredMessages.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _isSearching
+                                  ? Icons.search_off
+                                  : Icons.chat_bubble_outline,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              _isSearching
+                                  ? "No messages found"
+                                  : "No messages yet",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    // Schedule scroll to bottom after the list is built
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _scrollToBottom();
+                    });
+
+                    return ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.all(20),
+                      itemCount: _filteredMessages.length,
+                      itemBuilder: (context, index) {
+                        final message = _filteredMessages[index];
+                        final isSentMessage = message.senderId == userId;
+                        if (isSentMessage) {
+                          return _buildSentMessage(
+                            context,
+                            message.text,
+                            message.image,
+                            message.id,
+                          );
+                        } else {
+                          return _buildReceivedMessage(
+                            context,
+                            message.text,
+                            message.image,
+                            message.senderId,
+                          );
+                        }
+                      },
+                    );
+                  } else if (state is ChatErrorState) {
+                    return Center(child: Text(state.error));
+                  }
+                  return Center(child: Text("No messages found"));
+                },
+              ),
+            ),
+            _buildMessageInput(),
+          ],
+        ),
       ),
-    )
     );
   }
 
@@ -528,41 +533,95 @@ class _ChatPageState extends State<ChatPage> {
     BuildContext context,
     String mess,
     List<String>? images,
+    String senderId,
   ) {
+    Map participant;
+    try {
+      participant = _participants.firstWhere((p) => p['_id'] == senderId);
+    } catch (e) {
+      participant = {};
+    }
+    final profilePic = participant['profilePic'] ?? '';
+    final fullName = participant['fullName'] ?? '';
+
     return Align(
       alignment: Alignment.centerLeft,
-      child: Container(
-        margin: EdgeInsets.only(right: 38, top: 5, bottom: 5),
-        padding: EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: DefaultColors.receiverMessage,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (mess.isNotEmpty)
-              Text(mess, style: Theme.of(context).textTheme.bodyMedium),
-            if (images != null && images.isNotEmpty) ...[
-              SizedBox(height: 8),
-              for (var image in images)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      image,
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (context, error, stackTrace) => Icon(Icons.error),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Avatar + Name
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0, top: 2.0),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: AppColors.primaryColor,
+                  backgroundImage:
+                      profilePic.isNotEmpty ? NetworkImage(profilePic) : null,
+                  child:
+                      profilePic.isEmpty
+                          ? Text(
+                            (fullName.isNotEmpty ? fullName[0] : '?')
+                                .toUpperCase(),
+                            style: const TextStyle(color: AppColors.textPrimary),
+                          )
+                          : null,
+                ),
+                if (_isGroup)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2.0),
+                    child: Text(
+                      fullName,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-            ],
-          ],
-        ),
+              ],
+            ),
+          ),
+          // Message bubble
+          Flexible(
+            child: Container(
+              margin: EdgeInsets.only(right: 38, top: 5, bottom: 5),
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: DefaultColors.receiverMessage,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (mess.isNotEmpty)
+                    Text(mess, style: Theme.of(context).textTheme.bodyMedium),
+                  if (images != null && images.isNotEmpty) ...[
+                    SizedBox(height: 8),
+                    for (var image in images)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            image,
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    Icon(Icons.error),
+                          ),
+                        ),
+                      ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -4,7 +4,7 @@ class GetParticipantsUseCase {
   final ConversationRepository repository;
   GetParticipantsUseCase(this.repository);
 
-  Future<List<String>> call(String conversationId) async {
+  Future<List<Map<String, dynamic>>> call(String conversationId) async {
     return repository.getParticipants(conversationId);
   }
 }

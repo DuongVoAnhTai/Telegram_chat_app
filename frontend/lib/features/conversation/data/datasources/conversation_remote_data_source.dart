@@ -120,7 +120,7 @@ class ConversationRemoteDataSource {
       throw Exception('Failed to add member to group chat');
     }
   }
-  Future<List<String>> getParticipants(String conversationId) async {
+  Future<List<Map<String, dynamic>>> getParticipants(String conversationId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/getParticipants/$conversationId'),
       headers: {'Content-Type': 'application/json',},
@@ -128,10 +128,10 @@ class ConversationRemoteDataSource {
     );
 
     if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return List<String>.from(data['participants']);
-  } else {
-    throw Exception('Failed to fetch participants: ${response.body}');
-  }
+      final data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data['participants']);
+    } else {
+      throw Exception('Failed to fetch participants: ${response.body}');
+    }
   }
 }
