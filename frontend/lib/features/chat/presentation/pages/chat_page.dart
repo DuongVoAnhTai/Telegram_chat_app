@@ -54,7 +54,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isSearching = false;
   List<dynamic> _filteredMessages = [];
   bool _isGroup = false;
-
+  
   @override
   void initState() {
     super.initState();
@@ -263,6 +263,10 @@ class _ChatPageState extends State<ChatPage> {
       },
     child: Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: Row(
           children: [
             CircleAvatar(
@@ -349,10 +353,10 @@ class _ChatPageState extends State<ChatPage> {
                           );
                         },
                       );
-                    } else if (value == 'add_member' && _isGroup) {
+                    } else if (value == 'group_settings' && _isGroup) {
                       context.push(
-                              "/add-member-page?conversationId=${widget.conversationId}",
-                            );
+                        "/group-setting?conversationId=${widget.conversationId}",
+                      );
                     }
                   },
                   itemBuilder:
@@ -375,13 +379,13 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                         if(_isGroup) 
                           const PopupMenuItem<String>(
-                          value: 'add_member',
+                          value: 'group_settings',
                           child: Row(
                             children: [
-                              Icon(Icons.person_add, color: Colors.blue),
+                              Icon(Icons.group, color: Colors.blue),
                               SizedBox(width: 8),
                               Text(
-                                'Add Member',
+                                'Group Settings',
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.w500,

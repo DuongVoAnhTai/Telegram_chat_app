@@ -167,6 +167,7 @@ class ChatApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp.router(
+
         title: 'Flutter Demo',
         theme: AppTheme.darkTheme,
         debugShowCheckedModeBanner: false,
