@@ -70,11 +70,7 @@ class _AddMemberPageState extends State<AddMemberPage> {
   Widget build(BuildContext context) {
     return BlocListener<ConversationBloc, ConversationState>(
       listener: (context, state) {
-        if (state is ConversationLoading) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Adding members...')));
-        } else if (state is ParticipantsLoaded) {
+        if (state is ParticipantsLoaded) {
           setState(() {
             currentParticipants = state.participants;
           });
