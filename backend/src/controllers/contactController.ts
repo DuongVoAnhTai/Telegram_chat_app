@@ -12,7 +12,7 @@ export const fetchContacts = async (req: any, res: any) => {
         userId = req.user._id;
     }
     try {
-        const contacts = await Contact.find({ userId: userId }).populate('contactId', 'fullName email');
+        const contacts = await Contact.find({ userId: userId }).populate('contactId', 'fullName email profilePic');
         res.status(200).json(contacts);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching contacts', error });
