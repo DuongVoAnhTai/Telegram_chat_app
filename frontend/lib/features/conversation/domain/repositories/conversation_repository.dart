@@ -8,4 +8,6 @@ abstract class ConversationRepository {
   Future<void> createGroupChat(List<String> participantIds, String groupName);
   Future<void> addMemberToGroupChat(String conversationId, String newMemberId);
   Future<List<Participant>> getParticipants(String conversationId);  
+  Future<void> removeMemberFromGroupChat(String conversationId, String memberId);
+  Future<void> changeConversationName(String conversationId, String newName);
 }

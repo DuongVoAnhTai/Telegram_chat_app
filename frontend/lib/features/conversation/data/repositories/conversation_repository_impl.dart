@@ -31,6 +31,14 @@ class ConversationRepositoryImpl implements ConversationRepository {
     return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, newMemberId);
   }
   @override
+  Future<void> removeMemberFromGroupChat(String conversationId, String memberId) async {
+    return await converstionRemoteDataSource.removeMemberFromGroupChat(conversationId, memberId);
+  }
+  @override
+  Future<void> changeConversationName(String conversationId, String newName) async {
+    return await converstionRemoteDataSource.changeConversationName(conversationId, newName);
+  }
+  @override
   Future<List<Participant>> getParticipants(String conversationId) async {
     return await converstionRemoteDataSource.getParticipants(conversationId);
   }

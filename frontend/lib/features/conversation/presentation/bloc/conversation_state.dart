@@ -32,3 +32,15 @@ class ParticipantsLoaded extends ConversationState {
 
   ParticipantsLoaded(this.participants);
 }
+class MembersRemoved extends ConversationState {
+  final String conversationId;
+  final String memberId;
+
+  MembersRemoved(this.conversationId, this.memberId);
+}
+class ChangedConverName extends ConversationState {
+  final String conversationId;
+  final String newName;
+
+  ChangedConverName(this.conversationId, this.newName);
+}

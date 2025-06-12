@@ -22,7 +22,17 @@ class AddMemberToGroupChat extends ConversationEvent {
   final String newMemberId;
   AddMemberToGroupChat(this.conversationId, this.newMemberId);
 }
+class RemoveMembers extends ConversationEvent {
+  final String conversationId;
+  final String memberId;
+  RemoveMembers(this.conversationId, this.memberId);
+}
 class GetParticipants extends ConversationEvent {
   final String conversationId;
   GetParticipants(this.conversationId);
+}
+class ChangeConverName extends ConversationEvent {
+  final String conversationId;
+  final String newName;
+  ChangeConverName(this.conversationId, this.newName);
 }
