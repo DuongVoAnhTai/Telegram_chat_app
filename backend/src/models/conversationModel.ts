@@ -28,6 +28,11 @@ const ConversationSchema: Schema = new Schema(
         savedMessagesId: {
             type: mongoose.Types.ObjectId,
         },
+        ownerID: {
+            type: mongoose.Types.ObjectId,
+            ref: 'User',
+            require: false,
+        }
     },
     {
         timestamps: true,

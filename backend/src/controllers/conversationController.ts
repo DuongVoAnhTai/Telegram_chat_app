@@ -47,7 +47,8 @@ export const createConversation = async (req: any, res: any) => {
 
         const newConversation = new Conversation({
             name: conversationName,
-            participants
+            participants,
+            ownerID: req.user._id
         });
 
         const savedConversation = await newConversation.save();
@@ -58,6 +59,56 @@ export const createConversation = async (req: any, res: any) => {
         res.status(500).json({ message: 'Failed to create conversation', error });
     }
 }
+
+export const addMemberToConversation = async (req: Request, res: Response) => {
+    try {
+        const { conversationId } = req.params;
+        const { newMemberId } = req.body;
+
+        // // Kiểm tra định dạng ObjectId hợp lệ
+        if (!mongoose.Types.ObjectId.isValid(conversationId) || !mongoose.Types.ObjectId.isValid(newMemberId)) {
+             res.status(400).json({ message: 'Invalid conversationId or newMemberId' });
+             return;
+        }
+
+        const conversationObjectId = new mongoose.Types.ObjectId(conversationId);
+        const newMemberObjectId = new mongoose.Types.ObjectId(newMemberId);
+
+        console.log(conversationId);
+
+        const conversation = await Conversation.findById(conversationObjectId);
+        if (!conversation) {
+             res.status(404).json({ message: 'Conversation not found' });
+             return;
+        }
+
+        const alreadyParticipant = conversation.participants.some((participantId: mongoose.Types.ObjectId) =>
+            participantId.equals(newMemberObjectId)
+        );
+
+        if (alreadyParticipant) {
+             res.status(400).json({ message: 'User is already a participant in the conversation' });
+             return;
+        }
+
+        conversation.participants.push(newMemberObjectId);
+
+        // Cập nhật tên (nếu là group có nhiều người)
+        const users = await User.find({ _id: { $in: conversation.participants } }).select('fullName');
+        const nameMap = new Map(users.map(user => [user._id.toString(), user.fullName]));
+
+        conversation.name = conversation.participants
+            .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
+            .join(', ');
+
+        const updatedConversation = await conversation.save();
+
+         res.status(200).json(updatedConversation);
+    } catch (error) {
+        console.error('Error in addMemberToConversation:', error);
+         res.status(500).json({ message: 'Failed to add member to conversation', error });
+    }
+};
 
 // Get conversations of a user
 export const getUserConversations = async (req: Request, res: Response) => {
