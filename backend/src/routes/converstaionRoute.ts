@@ -12,5 +12,5 @@ router.post('/checkOrCreate', authenticateToken, checkOrCreateConversation);
 
 router.post('/addMember/:conversationId', addMemberToConversation);
 
-router.post('/getParticipants/:conversationId', getParticipantConversations);
+router.get('/getParticipants/:conversationId', getParticipantConversations);
 export default router;

@@ -157,18 +157,17 @@ export const getParticipantConversations = async (req: Request, res: Response) =
     const { conversationId } = req.params;
     const conversation = await Conversation.findOne({ _id: conversationId })
       .populate('participants', 'fullName profilePic')
-      .select('participants'); // Chỉ lấy trường participants
-
     if (!conversation) {
         res.status(404).json({ message: 'Conversation not found' });
       return ;
     }
-
-    // Trích xuất _id từ participants
-    const participantIds = conversation.participants.map(participant => participant._id.toString());
-    
-    console.log('Participants:', participantIds);
-    res.status(200).json({ participants: participantIds });
+     // Trích xuất _id và fullName từ participants
+    const participants = conversation.participants.map((participant: any) => ({
+      _id: participant._id.toString(),
+      fullName: participant.fullName,
+      profilePic: participant.profilePic,
+    }));
+    res.status(200).json({ participants });
   } catch (error) {
     console.error('Error fetching participants:', error);
     res.status(500).json({ message: 'Failed to fetch participants', error });
