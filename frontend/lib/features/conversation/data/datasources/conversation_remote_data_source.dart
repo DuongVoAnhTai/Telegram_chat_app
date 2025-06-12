@@ -53,7 +53,7 @@ class ConversationRemoteDataSource {
   Future<void> createConversations(String participantId) async {
     final token = await _storage.getToken();
     final response = await http.post(
-      Uri.parse('$baseUrl/createConversation'),
+      Uri.parse('$baseUrl/create'),
       body: jsonEncode({"participants": participantId}),
       headers: {
         "Content-Type": "application/json",
@@ -65,7 +65,6 @@ class ConversationRemoteDataSource {
       throw Exception('Failed to create conversations');
     }
   }
-
   Future<String> checkCreateConversation(String contactId) async {
     final token = await _storage.getToken();
     final response = await http.post(
@@ -81,6 +80,25 @@ class ConversationRemoteDataSource {
       var data = jsonDecode(response.body);
       return data['_id'];
     } else {
+      throw Exception('Failed to create conversations');
+    }
+  }
+  
+  Future<void> createGroupChat(List<String> participantIds, String groupName) async {
+    final token = await _storage.getToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/create'),
+      body: jsonEncode({
+        "participants": participantIds,
+        "groupName": groupName,
+        }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (response.statusCode != 201) {
       throw Exception('Failed to create conversations');
     }
   }

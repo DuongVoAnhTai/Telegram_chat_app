@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/core/services/token.dart';
 import 'package:frontend/features/contact/domain/entities/contact_entity.dart';
 import 'package:frontend/features/contact/presentation/bloc/contact_bloc.dart';
 import 'package:frontend/features/contact/presentation/bloc/contact_event.dart';
 import 'package:frontend/features/contact/presentation/bloc/contact_state.dart';
+import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
+import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 
 class CreateGroupPage extends StatefulWidget {
   const CreateGroupPage({super.key});
@@ -16,9 +19,10 @@ class CreateGroupPage extends StatefulWidget {
 class _CreateGroupPageState extends State<CreateGroupPage> {
   List<ContactEntity> selectedUsers = [];
   List<ContactEntity> filteredUsers = [];
+  List<String> participantIds = [];
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
-
+  final _storage = TokenStorageService();
   @override
   void initState() {
     super.initState();
@@ -68,6 +72,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                   );
                   return;
                 }
+                
                 Navigator.of(context).pop(groupName);
               },
               child: const Text('OK', style: TextStyle(color: AppColors.textPrimary)),
@@ -84,9 +89,14 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         );
         return;
       }
-       final selectedIds = selectedUsers.map((user) => user.id).toList();
+      String thisUserId = await _storage.getUserId() ?? '';
+       participantIds = selectedUsers.map((contact) => contact.userId).toList();
+       participantIds.add(thisUserId);         
       try {
         // await _apiService.createGroup(groupName, selectedIds, widget.currentUserId);
+        BlocProvider.of<ConversationBloc>(context).add(
+          CreateGroupChat(participantIds, groupName),
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Group "$groupName" created successfully')),
         );

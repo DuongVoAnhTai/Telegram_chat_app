@@ -32,18 +32,27 @@ export const createConversation = async (req: any, res: any) => {
         const users = await User.find({ _id: { $in: participants } }).select('fullName');
 
         const nameMap = new Map(users.map(user => [user._id.toString(), user.fullName]));
-
-        // Default conversation name: all participants
-        let conversationName = participants
-            .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
-            .join(', ');
-
-        // If it's a one-on-one, exclude current user
-        if (participants.length === 2) {
-            conversationName = otherParticipants
+        
+        const {groupName} = req.body;
+        let conversationName = "";
+        if(!groupName) {
+    // If groupName is provided, use it; otherwise, generate a default name
+            // Default conversation name: all participants
+            conversationName = participants
                 .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
                 .join(', ');
+
+            // If it's a one-on-one, exclude current user
+            if (participants.length === 2) {
+                conversationName = otherParticipants
+                    .map((id: mongoose.Types.ObjectId) => nameMap.get(id.toString()) || 'Unknown')
+                    .join(', ');
+            }
+        }else{
+            // If groupName is provided, use it
+            conversationName = groupName;
         }
+        
 
         const newConversation = new Conversation({
             name: conversationName,

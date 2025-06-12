@@ -1,25 +1,30 @@
 import 'package:frontend/core/services/socket.dart';
 import 'package:frontend/features/conversation/domain/usecase/check_create_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/create_conversation_use_case.dart';
+import 'package:frontend/features/conversation/domain/usecase/create_group_chat.dart';
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/models/conversation_model.dart';
 
 class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final FetchConversationUseCase fetchConversationUseCase;
   final CreateConversationUseCase createConversationUseCase;
+  final CreateGroupChatUseCase createGroupChatUseCase;
   final SocketService _socketService = SocketService();
 
   ConversationBloc({
     required this.fetchConversationUseCase,
     required this.createConversationUseCase,
+    required this.createGroupChatUseCase,
   }) : super(ConversationInitial()) {
     on<FetchConversations>(_onFetchConversations);
     on<CreateConversation>(_onCreateConversation);
     on<DeleteConversation>(_onDeleteConversation);
+    on<CreateGroupChat>(_onCreateGroupChat);
     _initSocketListeners();
   }
 
@@ -66,6 +71,22 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   ) async {
     try {
       _socketService.socket.emit('deleteConversation', event.conversationId);
+      add(FetchConversations());
+    } catch (error) {
+      emit(ConversationError(error.toString()));
+    }
+  }
+  Future<void> _onCreateGroupChat(
+    CreateGroupChat event,
+    Emitter<ConversationState> emit,
+  ) async {
+    emit(ConversationCreating());
+    try {
+      await createGroupChatUseCase.createGroupChat(event.participantIds, event.groupName);
+      _socketService.socket.emit('createGroupChat', {
+        'participantIds': event.participantIds,
+        'groupName': event.groupName,
+      });
       add(FetchConversations());
     } catch (error) {
       emit(ConversationError(error.toString()));

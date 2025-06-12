@@ -19,6 +19,7 @@ import 'package:frontend/features/conversation/data/datasources/conversation_rem
 import 'package:frontend/features/conversation/data/repositories/conversation_repository_impl.dart';
 import 'package:frontend/features/conversation/domain/usecase/check_create_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/create_conversation_use_case.dart';
+import 'package:frontend/features/conversation/domain/usecase/create_group_chat.dart';
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
 import 'package:frontend/features/recentCallScreen/data/dataSources/recentCall_remote_data_source.dart';
@@ -127,6 +128,9 @@ class ChatApp extends StatelessWidget {
                   conversationRepository,
                 ),
                 createConversationUseCase: CreateConversationUseCase(
+                  conversationRepository,
+                ),
+                createGroupChatUseCase: CreateGroupChatUseCase(
                   conversationRepository,
                 ),
               ),
