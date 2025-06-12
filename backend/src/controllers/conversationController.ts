@@ -109,9 +109,9 @@ export const addMemberToConversation = async (req: Request, res: Response) => {
 
         // Chỉ cập nhật tên nếu conversation.name rỗng hoặc không tồn tại
         if (!conversation.name || conversation.name.trim() === '') {
-        conversation.name = conversation.participants
-            .map(id => nameMap.get(id.toString()) || 'Unknown')
-            .join(', ');
+            conversation.name = conversation.participants
+                .map(id => nameMap.get(id.toString()) || 'Unknown')
+                .join(', ');
         }
 
         const updatedConversation = await conversation.save();
@@ -139,8 +139,8 @@ export const removeMemberFromConversation = async (req: Request, res: Response) 
 
         const conversation = await Conversation.findById(conversationObjectId);
         if (!conversation) {
-             res.status(404).json({ message: 'Conversation not found' });
-             return;
+            res.status(404).json({ message: 'Conversation not found' });
+            return;
         }
 
         const isParticipant = conversation.participants.some((participantId: mongoose.Types.ObjectId) =>
@@ -148,8 +148,8 @@ export const removeMemberFromConversation = async (req: Request, res: Response) 
         );
 
         if (!isParticipant) {
-             res.status(400).json({ message: 'User is not a participant in the conversation' });
-             return;
+            res.status(400).json({ message: 'User is not a participant in the conversation' });
+            return;
         }
 
         // Xoá thành viên
@@ -176,16 +176,16 @@ export const updateConversationName = async (req: Request, res: Response) => {
 
     const conversation = await Conversation.findById(conversationObjectId);
     if (!conversation) {
-         res.status(404).json({ message: 'Conversation not found' });
-         return;
+        res.status(404).json({ message: 'Conversation not found' });
+        return;
     }
 
-    if(name){
+    if (name) {
         conversation.name = name;
         await conversation.save();
     }
 
-    res.status(200).json({conversation});
+    res.status(200).json({ conversation });
 }
 
 // Get conversations of a user
@@ -219,25 +219,25 @@ export const getConversationBetweenUsers = async (req: Request, res: Response) =
     }
 }
 export const getParticipantConversations = async (req: Request, res: Response) => {
-  try {
-    const { conversationId } = req.params;
-    const conversation = await Conversation.findOne({ _id: conversationId })
-      .populate('participants', 'fullName profilePic')
-    if (!conversation) {
-        res.status(404).json({ message: 'Conversation not found' });
-      return ;
+    try {
+        const { conversationId } = req.params;
+        const conversation = await Conversation.findOne({ _id: conversationId })
+            .populate('participants', 'fullName profilePic')
+        if (!conversation) {
+            res.status(404).json({ message: 'Conversation not found' });
+            return;
+        }
+        // Trích xuất _id và fullName từ participants
+        const participants = conversation.participants.map((participant: any) => ({
+            _id: participant._id.toString(),
+            fullName: participant.fullName,
+            profilePic: participant.profilePic,
+        }));
+        res.status(200).json({ participants });
+    } catch (error) {
+        console.error('Error fetching participants:', error);
+        res.status(500).json({ message: 'Failed to fetch participants', error });
     }
-     // Trích xuất _id và fullName từ participants
-    const participants = conversation.participants.map((participant: any) => ({
-      _id: participant._id.toString(),
-      fullName: participant.fullName,
-      profilePic: participant.profilePic,
-    }));
-    res.status(200).json({ participants });
-  } catch (error) {
-    console.error('Error fetching participants:', error);
-    res.status(500).json({ message: 'Failed to fetch participants', error });
-  }
 };
 export const checkOrCreateConversation = async (req: any, res: any) => {
     try {
@@ -251,6 +251,7 @@ export const checkOrCreateConversation = async (req: any, res: any) => {
         // Check if the conversation already exists
         const existingConversation = await Conversation.findOne({
             participants: { $all: [userId, contactId] },
+            $expr: { $eq: [{ $size: "$participants" }, 2] }
         });
 
         if (existingConversation) {
