@@ -53,7 +53,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isUploading = false; // Track upload state
   bool _isSearching = false;
   List<dynamic> _filteredMessages = [];
-  bool _canAddMember = false;
+  bool _isGroup = false;
 
   @override
   void initState() {
@@ -251,12 +251,12 @@ class _ChatPageState extends State<ChatPage> {
       listener: (context, state) {
         if (state is ParticipantsLoaded) {
           setState(() {
-            _canAddMember = state.participants.length > 2;
-            print('Participants loaded: ${state.participants.length}, canAddMember: $_canAddMember');
+            _isGroup = state.participants.length > 2;
+            print('Participants loaded: ${state.participants.length}, canAddMember: $_isGroup');
           });
         } else if (state is ConversationError) {
           setState(() {
-            _canAddMember = false;
+            _isGroup = false;
             print('Error: ${state.message}');
           });
         }
@@ -349,7 +349,7 @@ class _ChatPageState extends State<ChatPage> {
                           );
                         },
                       );
-                    } else if (value == 'add_member' && _canAddMember) {
+                    } else if (value == 'add_member' && _isGroup) {
                       context.push(
                               "/add-member-page?conversationId=${widget.conversationId}",
                             );
@@ -373,7 +373,7 @@ class _ChatPageState extends State<ChatPage> {
                             ],
                           ),
                         ),
-                        if(_canAddMember) 
+                        if(_isGroup) 
                           const PopupMenuItem<String>(
                           value: 'add_member',
                           child: Row(
