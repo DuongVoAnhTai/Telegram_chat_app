@@ -248,7 +248,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   void _sendMessage(BuildContext context) {
     final message = _messageController.text.trim();
     if (message.isNotEmpty) {
-      context.read<ChatbotBloc>().add(SendMessageEvent(message));
+      context.read<ChatbotBloc>().add(SendMessageEvent(message,'')); // TO-DO
       _messageController.clear();
       FocusScope.of(context).unfocus(); // Hide keyboard after sending
     }

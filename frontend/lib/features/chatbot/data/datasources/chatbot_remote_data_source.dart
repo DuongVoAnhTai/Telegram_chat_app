@@ -48,7 +48,12 @@ class ChatbotRemoteDataSource {
     if (response.statusCode == 200) {
       return ChatbotModel.fromGeminiResponse(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to send message: ${response.body}');
+      return ChatbotModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      text: "Opps Gemini đang quá tải rồi",
+      isUserMessage: false,
+      timestamp: DateTime.now(),
+    );
     }
   }
 }

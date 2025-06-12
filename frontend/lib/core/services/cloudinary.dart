@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
 class CloudinaryHelper {
-  static const String baseUrl = "http://192.168.137.1:3000/auth";
+  static const String baseUrl = "http://10.0.2.2:3000/auth";
   static final _storage = FlutterSecureStorage();
 
   static Future<Map<String, dynamic>> getCloudinarySignature() async {

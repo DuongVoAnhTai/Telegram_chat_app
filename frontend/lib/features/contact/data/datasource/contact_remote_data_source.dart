@@ -4,7 +4,7 @@ import '../../../../core/services/token.dart';
 import '../models/contact_model.dart';
 
 class ContactRemoteDataSource {
-  final String baseUrl = 'http://192.168.137.1:3000/contact';
+  final String baseUrl = 'http://10.0.2.2:3000/contact';
   final _storage = TokenStorageService();
 
   Future<List<ContactModel>> fetchContacts() async {

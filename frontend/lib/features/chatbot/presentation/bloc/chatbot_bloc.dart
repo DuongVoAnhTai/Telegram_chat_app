@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/services/socket.dart';
+import 'package:frontend/core/services/token.dart';
 import '../../domain/entities/chatbot_entity.dart';
 import '../../domain/usecases/send_message_use_case.dart';
 import 'chatbot_event.dart';
@@ -11,7 +12,7 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
   final SocketService _socketService = SocketService();
   UserEntity user;
   List<ChatbotEntity> messages = [];
-
+  final storage = TokenStorageService();
   ChatbotBloc({
     required this.sendMessageUseCase,
     required this.user,
@@ -32,8 +33,17 @@ class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
 
     try {
       final botMessage = await sendMessageUseCase(event.message, user: user);
-      messages.add(botMessage);
-      emit(ChatbotLoadedState(messages: List.from(messages)));
+      
+        final newMessage = {
+          'text':  botMessage.text,
+          'image': [],
+          'senderId': "684b386245c0e47fa9255265",
+          'conversationId': event.conversationId,
+        };
+        _socketService.socket.emit('sendMessage', newMessage);
+        messages.add(botMessage);
+        emit(ChatbotLoadedState(messages: List.from(messages), message: botMessage.text));
+      
     } catch (error) {
       emit(ChatbotErrorState(error: 'Oops, có lỗi xảy ra! Hãy thử lại nhé!', messages: List.from(messages)));
     }

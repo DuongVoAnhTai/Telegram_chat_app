@@ -34,7 +34,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _socketService.socket.off('newMessage');
       _socketService.socket.emit('joinConversation', event.conversationId);
       _socketService.socket.on('newMessage', (data) {
-        print('step1: data');
         add(ReceiveMessagesEvent(data));
       });
     } catch (error) {
@@ -55,7 +54,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       'senderId': userId,
       'conversationId': event.conversationId,
     };
-
+    
     print("MESSAGE: $newMessage");
 
     _socketService.socket.emit('sendMessage', newMessage);

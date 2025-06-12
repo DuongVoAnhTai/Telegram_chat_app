@@ -235,7 +235,7 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
           };
           socketService.socket.emit('sendMessage', userMessage);
 
-          chatbotBloc.add(SendMessageEvent('$command\nContext: $contextString'));
+          chatbotBloc.add(SendMessageEvent('$command\nContext: $contextString', widget.conversationId));
         }
       } else {
         chatBloc.add(
@@ -634,7 +634,7 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
     // Tìm thông tin người gửi
     final sender = _participants.firstWhere(
           (p) => p.id == message.senderId,
-      orElse: () => Participant(id: '', fullName: 'Unknown', profilePic: ''),
+      orElse: () => Participant(id: '', fullName: 'ChatBot', profilePic: ''),
     );
 
     return Padding(

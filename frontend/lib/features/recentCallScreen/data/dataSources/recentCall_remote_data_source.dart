@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:frontend/core/services/token.dart';
 
 class RecentCallRemoteDataSource {
-  final String baseUrl = 'http://192.168.137.1:3000/callLog';
+  final String baseUrl = 'http://10.0.2.2:3000/callLog';
   final _storage = TokenStorageService();
 
   Future<List<RecentCallModel>> fetchRecentCalls() async {

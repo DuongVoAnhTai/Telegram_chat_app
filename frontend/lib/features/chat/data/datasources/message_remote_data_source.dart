@@ -6,7 +6,7 @@ import '../../../../core/services/token.dart';
 import '../models/message_model.dart';
 
 class MessageRemoteDataSource {
-  final String baseUrl = "http://192.168.137.1:3000/message";
+  final String baseUrl = "http://10.0.2.2:3000/message";
   final _storage = TokenStorageService();
 
   Future<List<MessageEntity>> fetchMessages(String conversationId) async {

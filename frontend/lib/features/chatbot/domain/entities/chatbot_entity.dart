@@ -3,7 +3,6 @@ class ChatbotEntity {
   final String text;
   final bool isUserMessage;
   final DateTime timestamp;
-
   ChatbotEntity({
     required this.id,
     required this.text,

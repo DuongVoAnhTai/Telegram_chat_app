@@ -13,8 +13,8 @@ class ChatbotLoadingState extends ChatbotState {
 
 class ChatbotLoadedState extends ChatbotState {
   final List<ChatbotEntity> messages;
-
-  ChatbotLoadedState({required this.messages});
+  final String message;
+  ChatbotLoadedState({required this.messages, required this.message});
 }
 
 class ChatbotErrorState extends ChatbotState {
