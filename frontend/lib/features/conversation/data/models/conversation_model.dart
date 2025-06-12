@@ -54,3 +54,24 @@ class ConversationModel extends ConversationEntity {
     );
   }
 }
+
+class Participant {
+  final String id;
+  final String fullName;
+  final String profilePic;
+
+  Participant({
+    required this.id,
+    required this.fullName,
+    required this.profilePic,
+  });
+
+  factory Participant.fromJson(Map<String, dynamic> json) {
+    return Participant(
+      id: json['_id'],
+      fullName: json['fullName'],
+      profilePic: json['profilePic'],
+    );
+  }
+}
+

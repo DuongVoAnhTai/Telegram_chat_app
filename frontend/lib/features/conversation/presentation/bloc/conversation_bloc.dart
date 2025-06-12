@@ -1,10 +1,12 @@
 import 'package:frontend/core/services/socket.dart';
 import 'package:frontend/features/conversation/domain/usecase/add_member_to_group_chat.dart';
+import 'package:frontend/features/conversation/domain/usecase/change_name.dart';
 import 'package:frontend/features/conversation/domain/usecase/check_create_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/create_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/create_group_chat.dart';
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/get_participants.dart';
+import 'package:frontend/features/conversation/domain/usecase/remove_member.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +19,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final CreateConversationUseCase createConversationUseCase;
   final CreateGroupChatUseCase createGroupChatUseCase;
   final AddMemberToGroupChatUseCase addMemberToGroupChatUseCase;
+  final RemoveMemberUseCase removeMemberUseCase;
   final GetParticipantsUseCase getParticipantsUseCase;
+  final ChangeConverNameUseCase changeConverNameUseCase;
   final SocketService _socketService = SocketService();
 
   ConversationBloc({
@@ -26,6 +30,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.createGroupChatUseCase,
     required this.addMemberToGroupChatUseCase,
     required this.getParticipantsUseCase,
+    required this.removeMemberUseCase,
+    required this.changeConverNameUseCase,
   }) : super(ConversationInitial()) {
     on<FetchConversations>(_onFetchConversations);
     on<CreateConversation>(_onCreateConversation);
@@ -33,6 +39,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<CreateGroupChat>(_onCreateGroupChat);
     on<AddMemberToGroupChat>(_onAddMemberToGroupChat);
     on<GetParticipants>(_onGetParticipants);
+    on<RemoveMembers>(_onRemoveMembers);
+    on<ChangeConverName>(_onChangeConverName);
     _initSocketListeners();
   }
 
@@ -125,7 +133,27 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       final participants = await getParticipantsUseCase(event.conversationId);
       emit(ParticipantsLoaded(participants));
     } catch (error) {
-      print("herererererer $error");
+      emit(ConversationError(error.toString()));
+    }
+  }
+  Future<void> _onRemoveMembers(
+     RemoveMembers event,
+    Emitter<ConversationState> emit,
+  ) async {
+    emit(ConversationLoading());
+    try {
+      await removeMemberUseCase(event.conversationId, event.memberId);
+      emit(MembersRemoved(event.conversationId, event.memberId));
+    }catch(error) {
+      emit(ConversationError(error.toString()));
+    }
+  }
+  Future<void> _onChangeConverName(ChangeConverName event, Emitter<ConversationState> emit) async {
+    emit(ConversationLoading());
+    try{
+      await changeConverNameUseCase(event.conversationId, event.newName);
+      emit(ChangedConverName(event.conversationId, event.newName));
+    }catch(error) {
       emit(ConversationError(error.toString()));
     }
   }

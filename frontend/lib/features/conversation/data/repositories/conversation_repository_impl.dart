@@ -1,4 +1,5 @@
 import 'package:frontend/features/conversation/data/datasources/conversation_remote_data_source.dart';
+import 'package:frontend/features/conversation/data/models/conversation_model.dart';
 import 'package:frontend/features/conversation/domain/entities/conversation_entity.dart';
 import 'package:frontend/features/conversation/domain/repositories/conversation_repository.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,15 @@ class ConversationRepositoryImpl implements ConversationRepository {
     return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, newMemberId);
   }
   @override
-  Future<List<Map<String, dynamic>>> getParticipants(String conversationId) async {
+  Future<void> removeMemberFromGroupChat(String conversationId, String memberId) async {
+    return await converstionRemoteDataSource.removeMemberFromGroupChat(conversationId, memberId);
+  }
+  @override
+  Future<void> changeConversationName(String conversationId, String newName) async {
+    return await converstionRemoteDataSource.changeConversationName(conversationId, newName);
+  }
+  @override
+  Future<List<Participant>> getParticipants(String conversationId) async {
     return await converstionRemoteDataSource.getParticipants(conversationId);
   }
 }
