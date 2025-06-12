@@ -13,7 +13,9 @@ import 'package:frontend/src/ui/feature/splash/splash_screen.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/chat/presentation/pages/chat_page.dart';
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 final GoRouter router = GoRouter(
   navigatorKey: GlobalKey<NavigatorState>(),
   initialLocation: '/splash', // Bắt đầu từ SplashScreen
@@ -31,7 +33,12 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(path: '/register', builder: (context, state) => RegisterScreen()),
-    GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) {
+        return HomeScreen();
+      },
+    ),
     GoRoute(
       path: '/edit-profile',
       builder: (context, state) => EditProfileScreen(),
@@ -42,27 +49,42 @@ final GoRouter router = GoRouter(
         final conversationId = state.uri.queryParameters['id'] ?? 'defaultId';
         final mate = state.uri.queryParameters['mate'] ?? 'mate';
         final profilePic = state.uri.queryParameters['profilePic'];
-        return ChatPage(conversationId: conversationId, mate: mate, profilePic: profilePic,);
+        return ChatPage(
+          conversationId: conversationId,
+          mate: mate,
+          profilePic: profilePic,
+        );
       },
     ),
     GoRoute(path: '/contact-page', builder: (context, state) => ContactPage()),
-    GoRoute(path: '/recent-call', builder: (context, state) {
-      return RecentCallScreen();
-    }),
-    GoRoute(path: '/create-group-page', builder: (context, state) {
-      return CreateGroupPage();
-    }),
-    GoRoute(path: '/add-member-page', builder: (context, state) {
-      final converId = state.uri.queryParameters['conversationId'] ?? 'defaultGroupId';
-      return AddMemberPage(
-        conversationId: converId,
-      );
-    }),
-    GoRoute(path: '/group-setting', builder: (context, state) {
-      final conversationId = state.uri.queryParameters['conversationId'] ?? 'defaultGroupId';
-      return GroupSettingPage(conversationId: conversationId);
-    }),
-    
+    GoRoute(
+      path: '/recent-call',
+      builder: (context, state) {
+        return RecentCallScreen();
+      },
+    ),
+    GoRoute(
+      path: '/create-group-page',
+      builder: (context, state) {
+        return CreateGroupPage();
+      },
+    ),
+    GoRoute(
+      path: '/add-member-page',
+      builder: (context, state) {
+        final converId =
+            state.uri.queryParameters['conversationId'] ?? 'defaultGroupId';
+        return AddMemberPage(conversationId: converId);
+      },
+    ),
+    GoRoute(
+      path: '/group-setting',
+      builder: (context, state) {
+        final conversationId =
+            state.uri.queryParameters['conversationId'] ?? 'defaultGroupId';
+        return GroupSettingPage(conversationId: conversationId);
+      },
+    ),
   ],
-  observers: [routeObserver], 
+  observers: [routeObserver],
 );

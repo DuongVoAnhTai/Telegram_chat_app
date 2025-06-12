@@ -132,15 +132,18 @@ class ConversationRemoteDataSource {
     String conversationId,
     String memberId,
     ) async {
+      final token = await _storage.getToken();
       final response = await http.delete(
         Uri.parse('$baseUrl/$conversationId/removeUser'),
         headers: {
           'Content-Type': 'application/json',
+          "Authorization": "Bearer $token",
         },
         body: jsonEncode({"memberIdToRemove": memberId}),
       );
     if (response.statusCode != 200) {
-      throw Exception('Failed to add member to group chat');
+      print(response.statusCode);
+      throw Exception('Failed to remove member from group chat');
     }
   }
   Future<void> changeConversationName (
@@ -156,7 +159,7 @@ class ConversationRemoteDataSource {
         body: jsonEncode({"name": newName}),
       );
     if (response.statusCode != 200) {
-      throw Exception('Failed to add member to group chat');
+      throw Exception('Failed to change group chat');
     }
   }
   Future<List<Participant>> getParticipants(String conversationId) async {

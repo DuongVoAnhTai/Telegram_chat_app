@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/helpers/constants.dart';
+import 'package:frontend/core/services/token.dart';
 import 'package:frontend/features/conversation/data/models/conversation_model.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
@@ -29,6 +30,7 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
     BlocProvider.of<ConversationBloc>(
       context,
     ).add(RemoveMembers(conversationId, idMember));
+    BlocProvider.of<ConversationBloc>(context).add(FetchConversations());
   }
 
   // Show dialog to select and remove members
@@ -182,10 +184,68 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
                 _showGroupNameDialog();
               },
             ),
+            _SettingsTile(
+              icon: Icons.door_sliding_outlined,
+              title: "Out group",
+              onTap: () async {
+                bool confirm = await _showConfirmOutGroupDialog();
+                if (confirm) {
+                  final storage = TokenStorageService();
+                  String currentUserId = await storage.getUserId() ?? "";
+                  await _removeMember(widget.conversationId, currentUserId);
+                  if (mounted) {
+                    Navigator.of(context).pop(); // Pop current
+                    Navigator.of(context).pop(); // Pop về Home
+                  }
+                }
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<bool> _showConfirmOutGroupDialog() async {
+    bool confirmed = false;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.backgroundColor,
+          title: const Text(
+            'Confirm',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
+          content: const Text(
+            'Are you sure you want to leave this group?',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cancel
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textPrimary),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                confirmed = true;
+                Navigator.of(context).pop(); // Confirm
+              },
+              child: const Text(
+                'Leave',
+                style: TextStyle(color: Colors.red), // Nổi bật nút rời nhóm
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    return confirmed;
   }
 
   Future<void> _showGroupNameDialog() async {
