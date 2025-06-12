@@ -7,6 +7,7 @@ import 'package:frontend/features/conversation/domain/usecase/create_group_chat.
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/get_participants.dart';
 import 'package:frontend/features/conversation/domain/usecase/remove_member.dart';
+import 'package:frontend/features/conversation/domain/usecase/update_group_profile_pic.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +24,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final RemoveMemberUseCase removeMemberUseCase;
   final GetParticipantsUseCase getParticipantsUseCase;
   final ChangeConverNameUseCase changeConverNameUseCase;
+  final UpdateGroupProfilePicUseCase updateGroupProfilePicUseCase;
   final SocketService _socketService = SocketService();
 
   ConversationBloc({
@@ -33,6 +35,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.getParticipantsUseCase,
     required this.removeMemberUseCase,
     required this.changeConverNameUseCase,
+    required this.updateGroupProfilePicUseCase,
   }) : super(ConversationInitial()) {
     on<FetchConversations>(_onFetchConversations);
     on<CreateConversation>(_onCreateConversation);
@@ -42,6 +45,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<GetParticipants>(_onGetParticipants);
     on<RemoveMembers>(_onRemoveMembers);
     on<ChangeConverName>(_onChangeConverName);
+    on<UpdateGroupProfilePic>(_onUpdateGroupProfilePic);
     _initSocketListeners();
   }
 
@@ -162,6 +166,23 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     try {
       await changeConverNameUseCase(event.conversationId, event.newName);
       emit(ChangedConverName(event.conversationId, event.newName));
+    } catch (error) {
+      emit(ConversationError(error.toString()));
+    }
+  }
+
+  Future<void> _onUpdateGroupProfilePic(
+    UpdateGroupProfilePic event,
+    Emitter<ConversationState> emit,
+  ) async {
+    emit(ConversationLoading());
+    try {
+      await updateGroupProfilePicUseCase(
+        event.conversationId,
+        event.profilePic,
+      );
+      emit(UpdatedGroupProfilePic(event.conversationId, event.profilePic));
+      add(FetchConversations());
     } catch (error) {
       emit(ConversationError(error.toString()));
     }

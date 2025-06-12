@@ -22,22 +22,32 @@ class ConversationModel extends ConversationEntity {
          profilePic: profilePic,
        );
 
-  static Future<ConversationModel> fromJson(Map<String, dynamic> json, String names,) async {
+  static Future<ConversationModel> fromJson(
+    Map<String, dynamic> json,
+    String names,
+  ) async {
     // Get the other participant's profile picture
     String? profilePic;
-    if (json['participants'] != null && json['participants'] is List) {
-      final participants = json['participants'] as List;
-      if (participants.isNotEmpty) {
-        // Get current user ID from storage
-        final storage = FlutterSecureStorage();
-        final currentUserId = await storage.read(key: 'userId');
 
-        // Find the other participant (not the current user)
-        for (var participant in participants) {
-          if (participant['_id'] != currentUserId) {
-            names = participant['fullName'];
-            profilePic = participant['profilePic'];
-            break;
+    // For group chats, use the conversation's profilePic
+    if (json['name'] != null && json['name'].toString().isNotEmpty) {
+      profilePic = json['profilePic'];
+    } else {
+      // For individual chats, get the other participant's profile picture
+      if (json['participants'] != null && json['participants'] is List) {
+        final participants = json['participants'] as List;
+        if (participants.isNotEmpty) {
+          // Get current user ID from storage
+          final storage = FlutterSecureStorage();
+          final currentUserId = await storage.read(key: 'userId');
+
+          // Find the other participant (not the current user)
+          for (var participant in participants) {
+            if (participant['_id'] != currentUserId) {
+              names = participant['fullName'];
+              profilePic = participant['profilePic'];
+              break;
+            }
           }
         }
       }
@@ -74,4 +84,3 @@ class Participant {
     );
   }
 }
-

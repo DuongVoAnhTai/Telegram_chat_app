@@ -125,9 +125,10 @@ class ConversationRemoteDataSource {
     if (response.statusCode != 200) {
       final responseData = jsonDecode(response.body);
       final message = responseData['message'] ?? 'Unknown error';
-      throw Exception(message); 
+      throw Exception(message);
     }
   }
+
   Future<void> removeMemberFromGroupChat(
     String conversationId,
     String memberId,
@@ -146,25 +147,42 @@ class ConversationRemoteDataSource {
       throw Exception('Failed to remove member from group chat');
     }
   }
-  Future<void> changeConversationName (
+
+  Future<void> changeConversationName(
     String conversationId,
-    String newName
-  ) async
-  {
+    String newName,
+  ) async {
     final response = await http.put(
-        Uri.parse('$baseUrl/$conversationId'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({"name": newName}),
-      );
+      Uri.parse('$baseUrl/$conversationId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"name": newName}),
+    );
     if (response.statusCode != 200) {
       throw Exception('Failed to change group chat');
     }
   }
+
+  Future<void> updateGroupProfilePic(
+    String conversationId,
+    String profilePic,
+  ) async {
+    final token = await _storage.getToken();
+    final response = await http.put(
+      Uri.parse('$baseUrl/$conversationId/profile-pic'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({"profilePic": profilePic}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update group profile picture');
+    }
+  }
+
   Future<List<Participant>> getParticipants(String conversationId) async {
     final response = await http.get(
-      
       Uri.parse('$baseUrl/getParticipants/$conversationId'),
       headers: {'Content-Type': 'application/json'},
     );

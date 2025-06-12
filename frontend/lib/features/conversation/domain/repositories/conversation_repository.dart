@@ -10,4 +10,5 @@ abstract class ConversationRepository {
   Future<List<Participant>> getParticipants(String conversationId);  
   Future<void> removeMemberFromGroupChat(String conversationId, String memberId);
   Future<void> changeConversationName(String conversationId, String newName);
+  Future<void> updateGroupProfilePic(String conversationId, String profilePic);
 }

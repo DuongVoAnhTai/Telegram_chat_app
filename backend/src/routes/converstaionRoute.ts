@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
-import { getUserConversations, createConversation, getParticipantConversations, checkOrCreateConversation, removeMemberFromConversation, updateConversationName, removeConversation, addMembersToConversation } from "../controllers/conversationController";
+import { getUserConversations, createConversation, getParticipantConversations, checkOrCreateConversation, removeMemberFromConversation, updateConversationName, removeConversation, addMembersToConversation, updateConversationProfilePic } from "../controllers/conversationController";
 
 
 const router = express.Router();
@@ -20,5 +20,7 @@ router.delete('/:conversationId/removeConversation',authenticateToken, removeCon
 
 router.put("/:conversationId", updateConversationName);
 
-router.get('/getParticipants/:conversationId', getParticipantConversations);
+router.put("/:conversationId/profile-pic", authenticateToken, updateConversationProfilePic);
+
+router.get("/getParticipants/:conversationId", getParticipantConversations);
 export default router;
