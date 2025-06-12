@@ -119,15 +119,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     Emitter<ConversationState> emit,
   ) async {
     try {
-      await addMemberToGroupChatUseCase(
-        event.conversationId,
-        event.newMemberId,
-      );
-      _socketService.socket.emit('addMemberToGroupChat', {
-        'conversationId': event.conversationId,
-        'newMemberId': event.newMemberId,
-      });
-      emit(MembersAdded(event.conversationId, event.newMemberId));
+      await addMemberToGroupChatUseCase(event.conversationId, event.userIds);
+
+      emit(MembersAdded(event.conversationId, event.userIds));
       add(FetchConversations());
     } on Exception catch (e) {
       emit(ConversationError(e.toString().replaceFirst('Exception: ', '')));

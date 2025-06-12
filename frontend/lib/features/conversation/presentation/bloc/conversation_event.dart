@@ -19,8 +19,8 @@ class CreateGroupChat extends ConversationEvent {
 }
 class AddMemberToGroupChat extends ConversationEvent {
   final String conversationId;
-  final String newMemberId;
-  AddMemberToGroupChat(this.conversationId, this.newMemberId);
+  final List<String> userIds;
+  AddMemberToGroupChat(this.conversationId, this.userIds);
 }
 class RemoveMembers extends ConversationEvent {
   final String conversationId;

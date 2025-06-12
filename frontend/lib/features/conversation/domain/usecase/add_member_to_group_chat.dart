@@ -4,7 +4,7 @@ class AddMemberToGroupChatUseCase {
   final ConversationRepository repository;
   AddMemberToGroupChatUseCase(this.repository);
 
-  Future<void> call(String conversationId, String newMemberId) async {
-    return repository.addMemberToGroupChat(conversationId, newMemberId);
+  Future<void> call(String conversationId, List<String> userIds) async {
+    return repository.addMemberToGroupChat(conversationId, userIds);
   }
 }
