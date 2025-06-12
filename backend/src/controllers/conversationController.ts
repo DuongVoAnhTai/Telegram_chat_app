@@ -110,6 +110,70 @@ export const addMemberToConversation = async (req: Request, res: Response) => {
     }
 };
 
+export const removeMemberFromConversation = async (req: Request, res: Response) => {
+    try {
+        const { conversationId } = req.params;
+        const { memberIdToRemove } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(conversationId) || !mongoose.Types.ObjectId.isValid(memberIdToRemove)) {
+             res.status(400).json({ message: 'Invalid conversationId or memberIdToRemove' });
+             return;
+        }
+
+        const conversationObjectId = new mongoose.Types.ObjectId(conversationId);
+        const memberObjectId = new mongoose.Types.ObjectId(memberIdToRemove);
+
+        const conversation = await Conversation.findById(conversationObjectId);
+        if (!conversation) {
+             res.status(404).json({ message: 'Conversation not found' });
+             return;
+        }
+
+        const isParticipant = conversation.participants.some((participantId: mongoose.Types.ObjectId) =>
+            participantId.equals(memberObjectId)
+        );
+
+        if (!isParticipant) {
+             res.status(400).json({ message: 'User is not a participant in the conversation' });
+             return;
+        }
+
+        // Xoá thành viên
+        conversation.participants = conversation.participants.filter(
+            (participantId: mongoose.Types.ObjectId) => !participantId.equals(memberObjectId)
+        );
+
+        const updatedConversation = await conversation.save();
+
+        res.status(200).json(updatedConversation);
+    } catch (error) {
+        console.error('Error in removeMemberFromConversation:', error);
+        res.status(500).json({ message: 'Failed to remove member from conversation', error });
+    }
+};
+
+
+// update conversation name
+export const updateConversationName = async (req: Request, res: Response) => {
+    const { conversationId } = req.params;
+    const { name } = req.body;
+
+    const conversationObjectId = new mongoose.Types.ObjectId(conversationId);
+
+    const conversation = await Conversation.findById(conversationObjectId);
+    if (!conversation) {
+         res.status(404).json({ message: 'Conversation not found' });
+         return;
+    }
+
+    if(name){
+        conversation.name = name;
+        await conversation.save();
+    }
+
+    res.status(200).json({conversation});
+}
+
 // Get conversations of a user
 export const getUserConversations = async (req: Request, res: Response) => {
     try {
