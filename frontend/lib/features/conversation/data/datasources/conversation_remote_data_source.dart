@@ -124,7 +124,9 @@ class ConversationRemoteDataSource {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to add member to group chat');
+      final responseData = jsonDecode(response.body);
+      final message = responseData['message'] ?? 'Unknown error';
+      throw Exception(message); 
     }
   }
   Future<void> removeMemberFromGroupChat(

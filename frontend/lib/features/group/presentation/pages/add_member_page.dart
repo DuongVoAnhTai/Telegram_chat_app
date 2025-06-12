@@ -77,7 +77,7 @@ class _AddMemberPageState extends State<AddMemberPage> {
           Navigator.pop(context);
         } else if (state is ConversationError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to add members: ${state.message}')),
+            SnackBar(content: Text('${state.message}')),
           );
         }
       },

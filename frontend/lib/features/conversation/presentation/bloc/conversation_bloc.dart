@@ -11,6 +11,7 @@ import 'package:frontend/features/conversation/presentation/bloc/conversation_ev
 import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 
 import '../../data/models/conversation_model.dart';
 
@@ -92,13 +93,17 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       emit(ConversationError(error.toString()));
     }
   }
+
   Future<void> _onCreateGroupChat(
     CreateGroupChat event,
     Emitter<ConversationState> emit,
   ) async {
     emit(ConversationCreating());
     try {
-      await createGroupChatUseCase.createGroupChat(event.participantIds, event.groupName);
+      await createGroupChatUseCase.createGroupChat(
+        event.participantIds,
+        event.groupName,
+      );
       _socketService.socket.emit('createGroupChat', {
         'participantIds': event.participantIds,
         'groupName': event.groupName,
@@ -108,22 +113,27 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       emit(ConversationError(error.toString()));
     }
   }
+
   Future<void> _onAddMemberToGroupChat(
     AddMemberToGroupChat event,
     Emitter<ConversationState> emit,
   ) async {
     try {
-      await addMemberToGroupChatUseCase(event.conversationId, event.newMemberId);
+      await addMemberToGroupChatUseCase(
+        event.conversationId,
+        event.newMemberId,
+      );
       _socketService.socket.emit('addMemberToGroupChat', {
         'conversationId': event.conversationId,
         'newMemberId': event.newMemberId,
       });
       emit(MembersAdded(event.conversationId, event.newMemberId));
       add(FetchConversations());
-    } catch (error) {
-      emit(ConversationError(error.toString()));
+    } on Exception catch (e) {
+      emit(ConversationError(e.toString().replaceFirst('Exception: ', '')));
     }
   }
+
   Future<void> _onGetParticipants(
     GetParticipants event,
     Emitter<ConversationState> emit,
@@ -136,24 +146,29 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       emit(ConversationError(error.toString()));
     }
   }
+
   Future<void> _onRemoveMembers(
-     RemoveMembers event,
+    RemoveMembers event,
     Emitter<ConversationState> emit,
   ) async {
     emit(ConversationLoading());
     try {
       await removeMemberUseCase(event.conversationId, event.memberId);
       emit(MembersRemoved(event.conversationId, event.memberId));
-    }catch(error) {
+    } catch (error) {
       emit(ConversationError(error.toString()));
     }
   }
-  Future<void> _onChangeConverName(ChangeConverName event, Emitter<ConversationState> emit) async {
+
+  Future<void> _onChangeConverName(
+    ChangeConverName event,
+    Emitter<ConversationState> emit,
+  ) async {
     emit(ConversationLoading());
-    try{
+    try {
       await changeConverNameUseCase(event.conversationId, event.newName);
       emit(ChangedConverName(event.conversationId, event.newName));
-    }catch(error) {
+    } catch (error) {
       emit(ConversationError(error.toString()));
     }
   }
