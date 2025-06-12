@@ -53,7 +53,7 @@ class ConversationRemoteDataSource {
   Future<void> createConversations(String participantId) async {
     final token = await _storage.getToken();
     final response = await http.post(
-      Uri.parse('$baseUrl/createConversation'),
+      Uri.parse('$baseUrl/create'),
       body: jsonEncode({"participants": participantId}),
       headers: {
         "Content-Type": "application/json",
@@ -65,7 +65,6 @@ class ConversationRemoteDataSource {
       throw Exception('Failed to create conversations');
     }
   }
-
   Future<String> checkCreateConversation(String contactId) async {
     final token = await _storage.getToken();
     final response = await http.post(
@@ -83,5 +82,56 @@ class ConversationRemoteDataSource {
     } else {
       throw Exception('Failed to create conversations');
     }
+  }
+  
+  Future<void> createGroupChat(List<String> participantIds, String groupName) async {
+    final token = await _storage.getToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/create'),
+      body: jsonEncode({
+        "participants": participantIds,
+        "groupName": groupName,
+        }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to create conversations');
+    }
+  }
+  Future<void> addMemberToGroupChat(String conversationId, String newMemberId)
+   async {
+    print('Adding member to group chat: $conversationId, $newMemberId');
+    final response = await http.post(
+      Uri.parse('$baseUrl/addMember/$conversationId'),
+      headers: {
+        'Content-Type': 'application/json',
+        // Thêm token nếu cần: 'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        "newMemberId": newMemberId,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add member to group chat');
+    }
+  }
+  Future<List<String>> getParticipants(String conversationId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/getParticipants/$conversationId'),
+      headers: {'Content-Type': 'application/json',},
+      body: jsonEncode({"": ""}), // Body có thể để trống nếu không cần thiết
+    );
+
+    if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return List<String>.from(data['participants']);
+  } else {
+    throw Exception('Failed to fetch participants: ${response.body}');
+  }
   }
 }

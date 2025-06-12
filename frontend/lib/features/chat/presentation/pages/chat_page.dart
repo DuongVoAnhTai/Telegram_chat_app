@@ -2,10 +2,14 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:frontend/core/helpers/constants.dart';
 import 'package:frontend/core/services/token.dart';
+import 'package:frontend/features/conversation/data/datasources/conversation_remote_data_source.dart';
+import 'package:frontend/features/conversation/presentation/bloc/conversation_state.dart';
+import 'package:frontend/features/group/presentation/pages/add_member_page.dart';
 import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
 import 'package:frontend/features/recentCallScreen/domain/repositories/recentCall_repository.dart';
 import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_bloc.dart';
 import 'package:frontend/features/recentCallScreen/presentation/bloc/recentCall_event.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:frontend/features/chat/presentation/bloc/chat_state.dart';
@@ -49,6 +53,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isUploading = false; // Track upload state
   bool _isSearching = false;
   List<dynamic> _filteredMessages = [];
+  bool _canAddMember = false;
 
   @override
   void initState() {
@@ -56,6 +61,7 @@ class _ChatPageState extends State<ChatPage> {
     BlocProvider.of<ChatBloc>(
       context,
     ).add(LoadMessageEvent(widget.conversationId));
+    BlocProvider.of<ConversationBloc>(context).add(GetParticipants(widget.conversationId));
     fetchUserUI();
     _searchController.addListener(_filterMessages);
   }
@@ -66,7 +72,7 @@ class _ChatPageState extends State<ChatPage> {
       userId = userId;
     });
   }
-
+  
   @override
   void dispose() {
     _messageController.dispose();
@@ -213,7 +219,7 @@ class _ChatPageState extends State<ChatPage> {
                 onCallEnded: () {
                   _sendVideoCallMessage("ended");
                   recentCallRepo.endRecentCall(widget.conversationId);
-                } 
+                },
               ),
         ),
       );
@@ -241,15 +247,28 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<ConversationBloc, ConversationState>(
+      listener: (context, state) {
+        if (state is ParticipantsLoaded) {
+          setState(() {
+            _canAddMember = state.participants.length > 2;
+            print('Participants loaded: ${state.participants.length}, canAddMember: $_canAddMember');
+          });
+        } else if (state is ConversationError) {
+          setState(() {
+            _canAddMember = false;
+            print('Error: ${state.message}');
+          });
+        }
+      },
+    child: Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
             CircleAvatar(
               backgroundColor: AppColors.primaryColor,
               backgroundImage:
-                  widget.profilePic != null &&
-                    widget.profilePic!.isNotEmpty
+                  widget.profilePic != null && widget.profilePic!.isNotEmpty
                       ? NetworkImage(widget.profilePic!)
                       : null,
               child:
@@ -288,7 +307,7 @@ class _ChatPageState extends State<ChatPage> {
           Builder(
             builder:
                 (context) => PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: Colors.grey),
+                  icon: const Icon(Icons.more_vert, color: Colors.grey),
                   position: PopupMenuPosition.under,
                   onSelected: (value) {
                     if (value == 'delete') {
@@ -296,8 +315,8 @@ class _ChatPageState extends State<ChatPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Delete Conversation'),
-                            content: Text(
+                            title: const Text('Delete Conversation'),
+                            content: const Text(
                               'Are you sure you want to delete this conversation? This action cannot be undone.',
                             ),
                             shape: RoundedRectangleBorder(
@@ -305,10 +324,8 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                             actions: [
                               TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('Cancel'),
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Cancel'),
                               ),
                               TextButton(
                                 onPressed: () {
@@ -318,11 +335,9 @@ class _ChatPageState extends State<ChatPage> {
                                     DeleteConversation(widget.conversationId),
                                   );
                                   Navigator.of(context).pop(); // Close dialog
-                                  Navigator.of(
-                                    context,
-                                  ).pop(); // Go back to conversation page
+                                  Navigator.of(context).pop(); // Go back
                                 },
-                                child: Text(
+                                child: const Text(
                                   'Delete',
                                   style: TextStyle(
                                     color: Colors.red,
@@ -334,11 +349,15 @@ class _ChatPageState extends State<ChatPage> {
                           );
                         },
                       );
+                    } else if (value == 'add_member' && _canAddMember) {
+                      context.push(
+                              "/add-member-page?conversationId=${widget.conversationId}",
+                            );
                     }
                   },
                   itemBuilder:
                       (BuildContext context) => [
-                        PopupMenuItem<String>(
+                        const PopupMenuItem<String>(
                           value: 'delete',
                           child: Row(
                             children: [
@@ -348,6 +367,23 @@ class _ChatPageState extends State<ChatPage> {
                                 'Delete Conversation',
                                 style: TextStyle(
                                   color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if(_canAddMember) 
+                          const PopupMenuItem<String>(
+                          value: 'add_member',
+                          child: Row(
+                            children: [
+                              Icon(Icons.person_add, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text(
+                                'Add Member',
+                                style: TextStyle(
+                                  color: Colors.blue,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -484,6 +520,7 @@ class _ChatPageState extends State<ChatPage> {
           _buildMessageInput(),
         ],
       ),
+    )
     );
   }
 
