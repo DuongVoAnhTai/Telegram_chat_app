@@ -18,21 +18,25 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<ConversationBloc>(context).add(GetParticipants(widget.conversationId));
-
+    BlocProvider.of<ConversationBloc>(
+      context,
+    ).add(GetParticipants(widget.conversationId));
   }
+
   List<Participant> participants = [];
   // Mock function
   Future<void> _removeMember(String conversationId, String idMember) async {
-    BlocProvider.of<ConversationBloc>(context).add(RemoveMembers(conversationId, idMember));
+    BlocProvider.of<ConversationBloc>(
+      context,
+    ).add(RemoveMembers(conversationId, idMember));
   }
 
   // Show dialog to select and remove members
   void _showRemoveMemberDialog(List<Participant> members) async {
     if (members.isEmpty) {
-            print("empty nè");
+      print("empty nè");
       return;
-    } 
+    }
     if (!mounted) return;
 
     showDialog(
@@ -55,16 +59,41 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
                   itemCount: members.length,
                   itemBuilder: (context, index) {
                     final member = members[index];
-                    return RadioListTile<String>(
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primaryColor,
+                        backgroundImage:
+                            member.profilePic != null &&
+                                    member.profilePic!.isNotEmpty
+                                ? NetworkImage(member.profilePic!)
+                                : null,
+                        child:
+                            member.profilePic == null ||
+                                    member.profilePic!.isEmpty
+                                ? Text(
+                                  member.fullName[0].toUpperCase(),
+                                  style: const TextStyle(
+                                    color: AppColors.white,
+                                  ),
+                                )
+                                : null,
+                      ),
                       title: Text(
                         member.fullName,
                         style: TextStyle(color: AppColors.textPrimary),
                       ),
-                      value: member.id,
-                      groupValue: selectedMember,
-                      onChanged: (value) {
+                      trailing: Radio<String>(
+                        value: member.id,
+                        groupValue: selectedMember,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            selectedMember = value;
+                          });
+                        },
+                      ),
+                      onTap: () {
                         setDialogState(() {
-                          selectedMember = value;
+                          selectedMember = member.id;
                         });
                       },
                     );
@@ -86,7 +115,7 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
                           : () async {
                             await _removeMember(
                               widget.conversationId,
-                              selectedMember?? "",
+                              selectedMember ?? "",
                             );
                             if (!mounted) return;
                             Navigator.pop(context); // Close dialog
@@ -195,7 +224,9 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
                   );
                   return;
                 }
-                BlocProvider.of<ConversationBloc>(context).add(ChangeConverName(widget.conversationId, groupName));
+                BlocProvider.of<ConversationBloc>(
+                  context,
+                ).add(ChangeConverName(widget.conversationId, groupName));
                 Navigator.of(context).pop(groupName);
               },
               child: const Text(
