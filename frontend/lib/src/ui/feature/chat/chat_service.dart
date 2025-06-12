@@ -9,8 +9,8 @@ class ChatService {
 
   ChatService() {
     // Đọc API_URL và SOCKET_URL từ file .env
-    final apiUrl = dotenv.env['API_URL'] ?? 'http://10.0.2.2:3000';
-    final socketUrl = dotenv.env['SOCKET_URL'] ?? 'http://10.0.2.2:3000';
+    final apiUrl = dotenv.env['API_URL'] ?? 'http://192.168.137.1:3000';
+    final socketUrl = dotenv.env['SOCKET_URL'] ?? 'http://192.168.137.1:3000';
 
     // Kết nối socket.io
     socket = IO.io(socketUrl, IO.OptionBuilder()
@@ -25,7 +25,7 @@ class ChatService {
   // Lấy tin nhắn cũ từ API
   Future<void> fetchMessages() async {
     try {
-      final apiUrl = dotenv.env['API_URL'] ?? 'http://10.0.2.2:3000';
+      final apiUrl = dotenv.env['API_URL'] ?? 'http://192.168.137.1:3000';
       final response = await http.get(Uri.parse('$apiUrl/api/messages'));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);

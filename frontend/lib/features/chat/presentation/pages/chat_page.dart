@@ -28,6 +28,9 @@ import 'package:frontend/features/conversation/presentation/bloc/conversation_bl
 import 'package:frontend/features/conversation/presentation/bloc/conversation_event.dart';
 
 import '../../../../core/design_system/theme/theme.dart';
+import '../../../../core/services/socket.dart';
+import '../../../chatbot/presentation/bloc/chatbot_bloc.dart';
+import '../../../chatbot/presentation/bloc/chatbot_event.dart';
 import '../bloc/chat_bloc.dart';
 import '../bloc/chat_event.dart';
 
@@ -203,10 +206,43 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
 
     // Send the message with text and/or images
     if (content.isNotEmpty || imageUrls.isNotEmpty) {
-      BlocProvider.of<ChatBloc>(context).add(
-        SendMessagesEvent(widget.conversationId, content, imageUrls: imageUrls),
-      );
-      // Scroll to bottom after sending message
+      final chatBloc = context.read<ChatBloc>();
+      final socketService = context.read<SocketService>();
+
+      if (content.startsWith('@TLG_ChatBot')) {
+        final command = content.replaceFirst('@TLG_ChatBot', '').trim();
+        final chatbotBloc = context.read<ChatbotBloc>();
+
+        if (chatBloc.state is ChatLoadedState) {
+          final loadedState = chatBloc.state as ChatLoadedState;
+
+          final recentMessages = loadedState.messages
+              .where((message) => message.conversationId == widget.conversationId)
+              .take(40)
+              .toList()
+              .reversed
+              .toList();
+
+          final contextString = recentMessages.map((msg) =>
+          "Sender: ${msg.senderId}, Text: ${msg.text}, Time: ${msg.createAt.toIso8601String()}"
+          ).join('\n');
+
+          final userMessage = {
+            'text': content,
+            'image': imageUrls,
+            'senderId': userId,
+            'conversationId': widget.conversationId,
+          };
+          socketService.socket.emit('sendMessage', userMessage);
+
+          chatbotBloc.add(SendMessageEvent('$command\nContext: $contextString'));
+        }
+      } else {
+        chatBloc.add(
+          SendMessagesEvent(widget.conversationId, content, imageUrls: imageUrls),
+        );
+      }
+
       _scrollToBottom();
     }
     _messageController.clear();
@@ -590,14 +626,14 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
   }
 
   Widget _buildReceivedMessage(
-    BuildContext context,
-    String mess,
-    List<String>? images,
-    MessageEntity message,
-  ) {
-    // Find the sender's info from participants
+      BuildContext context,
+      String mess,
+      List<String>? images,
+      MessageEntity message,
+      ) {
+    // Tìm thông tin người gửi
     final sender = _participants.firstWhere(
-      (p) => p.id == message.senderId,
+          (p) => p.id == message.senderId,
       orElse: () => Participant(id: '', fullName: 'Unknown', profilePic: ''),
     );
 
@@ -609,33 +645,30 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
           CircleAvatar(
             radius: 16,
             backgroundColor: AppColors.primaryColor,
-            backgroundImage:
-                sender.profilePic.isNotEmpty
-                    ? NetworkImage(sender.profilePic)
-                    : null,
-            child:
-                sender.profilePic.isEmpty
-                    ? Text(
-                      sender.fullName.isNotEmpty
-                          ? sender.fullName[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 12,
-                      ),
-                    )
-                    : null,
+            backgroundImage: sender.profilePic.isNotEmpty
+                ? NetworkImage(sender.profilePic)
+                : null,
+            child: sender.profilePic.isEmpty
+                ? Text(
+              sender.fullName.isNotEmpty
+                  ? sender.fullName[0].toUpperCase()
+                  : '?',
+              style: const TextStyle(
+                color: AppColors.white,
+                fontSize: 12,
+              ),
+            )
+                : null,
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Only show sender's name in group chats
                 if (_isGroup)
                   Text(
                     sender.fullName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
@@ -643,9 +676,11 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
                   ),
                 Container(
                   margin: EdgeInsets.only(top: _isGroup ? 6 : 0),
-                  padding: EdgeInsets.all(15),
+                  padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
-                    color: DefaultColors.receiverMessage,
+                    color: mess.startsWith('@TLG_ChatBot')
+                        ? Colors.yellow[300]
+                        : DefaultColors.receiverMessage,
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Column(
@@ -657,7 +692,7 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       if (images != null && images.isNotEmpty) ...[
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         for (var image in images)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8),
@@ -670,7 +705,7 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
                                 fit: BoxFit.cover,
                                 errorBuilder:
                                     (context, error, stackTrace) =>
-                                        Icon(Icons.error),
+                                const Icon(Icons.error),
                               ),
                             ),
                           ),
@@ -685,6 +720,7 @@ class _ChatPageState extends State<ChatPage> with RouteAware {
       ),
     );
   }
+
 
   Widget _buildSentMessage(
     BuildContext context,
