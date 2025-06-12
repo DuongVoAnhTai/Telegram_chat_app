@@ -17,10 +17,12 @@ import 'package:frontend/features/contact/domain/usecase/add_contact_use_case.da
 import 'package:frontend/features/contact/domain/usecase/fetch_contact_use_case.dart';
 import 'package:frontend/features/conversation/data/datasources/conversation_remote_data_source.dart';
 import 'package:frontend/features/conversation/data/repositories/conversation_repository_impl.dart';
+import 'package:frontend/features/conversation/domain/usecase/add_member_to_group_chat.dart';
 import 'package:frontend/features/conversation/domain/usecase/check_create_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/create_conversation_use_case.dart';
 import 'package:frontend/features/conversation/domain/usecase/create_group_chat.dart';
 import 'package:frontend/features/conversation/domain/usecase/fetch_conversation_use_case.dart';
+import 'package:frontend/features/conversation/domain/usecase/get_participants.dart';
 import 'package:frontend/features/conversation/presentation/bloc/conversation_bloc.dart';
 import 'package:frontend/features/recentCallScreen/data/dataSources/recentCall_remote_data_source.dart';
 import 'package:frontend/features/recentCallScreen/data/repositories/recentCall_repository_impl.dart';
@@ -131,6 +133,12 @@ class ChatApp extends StatelessWidget {
                   conversationRepository,
                 ),
                 createGroupChatUseCase: CreateGroupChatUseCase(
+                  conversationRepository,
+                ),
+                addMemberToGroupChatUseCase: AddMemberToGroupChatUseCase(
+                  conversationRepository,
+                ),
+                getParticipantsUseCase: GetParticipantsUseCase(
                   conversationRepository,
                 ),
               ),

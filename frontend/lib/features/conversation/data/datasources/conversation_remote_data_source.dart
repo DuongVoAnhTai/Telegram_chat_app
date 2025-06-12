@@ -102,4 +102,36 @@ class ConversationRemoteDataSource {
       throw Exception('Failed to create conversations');
     }
   }
+  Future<void> addMemberToGroupChat(String conversationId, String newMemberId)
+   async {
+    print('Adding member to group chat: $conversationId, $newMemberId');
+    final response = await http.post(
+      Uri.parse('$baseUrl/addMember/$conversationId'),
+      headers: {
+        'Content-Type': 'application/json',
+        // Thêm token nếu cần: 'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        "newMemberId": newMemberId,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add member to group chat');
+    }
+  }
+  Future<List<String>> getParticipants(String conversationId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/getParticipants/$conversationId'),
+      headers: {'Content-Type': 'application/json',},
+      body: jsonEncode({"": ""}), // Body có thể để trống nếu không cần thiết
+    );
+
+    if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return List<String>.from(data['participants']);
+  } else {
+    throw Exception('Failed to fetch participants: ${response.body}');
+  }
+  }
 }

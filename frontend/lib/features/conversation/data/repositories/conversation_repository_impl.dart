@@ -25,4 +25,12 @@ class ConversationRepositoryImpl implements ConversationRepository {
   Future<void> createGroupChat(List<String> participantIds, String groupName) async {
     return await converstionRemoteDataSource.createGroupChat(participantIds, groupName);
   }
+  @override
+  Future<void> addMemberToGroupChat(String conversationId, String newMemberId) async {
+    return await converstionRemoteDataSource.addMemberToGroupChat(conversationId, newMemberId);
+  }
+  @override
+  Future<List<String>> getParticipants(String conversationId) async {
+    return await converstionRemoteDataSource.getParticipants(conversationId);
+  }
 }

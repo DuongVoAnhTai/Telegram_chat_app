@@ -3,6 +3,7 @@ import 'package:frontend/features/auth/presentation/pages/getcode_screen.dart';
 import 'package:frontend/features/auth/presentation/pages/login_screen.dart';
 import 'package:frontend/features/auth/presentation/pages/register_screen.dart';
 import 'package:frontend/features/contact/presentation/pages/contact_page.dart';
+import 'package:frontend/features/group/presentation/pages/add_member_page.dart';
 import 'package:frontend/features/group/presentation/pages/create_group_page.dart';
 import 'package:frontend/features/recentCallScreen/presentation/pages/recentCall_screen.dart';
 import 'package:frontend/src/ui/feature/home/home_screen.dart';
@@ -48,6 +49,13 @@ final GoRouter router = GoRouter(
     }),
     GoRoute(path: '/create-group-page', builder: (context, state) {
       return CreateGroupPage();
+    }),
+    GoRoute(path: '/add-member-page', builder: (context, state) {
+      final converId = state.uri.queryParameters['conversationId'] ?? 'defaultGroupId';
+      return AddMemberPage(
+        conversationId: converId,
+        existingMemberIds: [],
+      );
     }),
   ],
 );

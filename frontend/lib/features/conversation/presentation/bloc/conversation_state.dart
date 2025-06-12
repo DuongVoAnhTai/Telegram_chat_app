@@ -19,3 +19,14 @@ class ConversationError extends ConversationState {
 
   ConversationError(this.message);
 }
+class MembersAdded extends ConversationState {
+  final String conversationId;
+  final String newMember;
+
+  MembersAdded(this.conversationId, this.newMember);
+}
+class ParticipantsLoaded extends ConversationState {
+  final List<String> participants;
+
+  ParticipantsLoaded(this.participants);
+}
