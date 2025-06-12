@@ -246,7 +246,7 @@ class _GroupSettingPageState extends State<GroupSettingPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Group "$groupName" change successfully')),
         );
-        Navigator.pop(context);
+        context.pop(groupName);
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to create group: $error')),
